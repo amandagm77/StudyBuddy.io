@@ -11,11 +11,10 @@ const userSchema = new mongoose.Schema(
 );
 
 // Runs automatically before a user document is saved
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next(); // only re-hash if password changed
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return; // only re-hash if password changed
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  next();
 });
 
 // Instance method to check a login attempt against the stored hash
