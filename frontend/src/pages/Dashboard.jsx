@@ -1,0 +1,86 @@
+import { useState, useEffect } from 'react';
+import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
+
+export default function Dashboard() {
+  const { user, logout } = useAuth();
+  const [subjects, setSubjects] = useState([]);
+  const [newSubjectTitle, setNewSubjectTitle] = useState('');
+  const [activeSubject, setActiveSubject] = useState(null);
+  const [notes, setNotes] = useState([]);
+  const [newNote, setNewNote] = useState({ title: '', body: '' });
+
+  useEffect(() => {
+    loadSubjects();
+  }, []);
+
+  async function loadSubjects() {
+    const res = await api.get('/subjects');
+    setSubjects(res.data);
+  }
+
+  async function createSubject(e) {
+    e.preventDefault();
+    if (!newSubjectTitle.trim()) return;
+    await api.post('/subjects', { title: newSubjectTitle });
+    setNewSubjectTitle('');
+    loadSubjects();
+  }
+
+  async function openSubject(subject) {
+    setActiveSubject(subject);
+    const res = await api.get(`/notes?subject=${subject._id}`);
+    setNotes(res.data);
+  }
+
+  async function createNote(e) {
+    e.preventDefault();
+    if (!newNote.title.trim() || !newNote.body.trim()) return;
+    await api.post('/notes', { ...newNote, subject: activeSubject._id });
+    setNewNote({ title: '', body: '' });
+    openSubject(activeSubject); // refresh notes list
+  }
+
+  return (
+    <div>
+      <header>
+        <span>Welcome, {user?.name}</span>
+        <button onClick={logout}>Logout</button>
+      </header>
+
+      <section>
+        <h3>Your Subjects</h3>
+        <form onSubmit={createSubject}>
+          <input placeholder="New subject title" value={newSubjectTitle}
+            onChange={(e) => setNewSubjectTitle(e.target.value)} />
+          <button type="submit">Add Subject</button>
+        </form>
+        <ul>
+          {subjects.map((s) => (
+            <li key={s._id}>
+              <button onClick={() => openSubject(s)}>{s.title}</button>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {activeSubject && (
+        <section>
+          <h3>Notes for {activeSubject.title}</h3>
+          <form onSubmit={createNote}>
+            <input placeholder="Note title" value={newNote.title}
+              onChange={(e) => setNewNote({ ...newNote, title: e.target.value })} />
+            <textarea placeholder="Note content" value={newNote.body}
+              onChange={(e) => setNewNote({ ...newNote, body: e.target.value })} />
+            <button type="submit">Add Note</button>
+          </form>
+          <ul>
+            {notes.map((n) => (
+              <li key={n._id}><strong>{n.title}</strong>: {n.body}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </div>
+  );
+}
