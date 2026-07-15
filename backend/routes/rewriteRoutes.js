@@ -1,0 +1,81 @@
+const express = require('express');
+const Anthropic = require('@anthropic-ai/sdk');
+const Note = require('../models/Note');
+const Rewrite = require('../models/Rewrite');
+const requireAuth = require('../middleware/auth');
+
+const router = express.Router();
+router.use(requireAuth);
+
+// Same pattern as quizRoutes.js: only instantiate if the key exists
+const anthropic = process.env.ANTHROPIC_API_KEY
+  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  : null;
+
+// POST /api/rewrites/generate
+// Body: { noteId: string }
+router.post('/generate', async (req, res) => {
+  if (!anthropic) {
+    return res.status(500).json({ error: 'AI service is not configured (missing API key)' });
+  }
+
+  const { noteId } = req.body;
+  if (!noteId) {
+    return res.status(400).json({ error: 'noteId is required' });
+  }
+
+  try {
+    // Ownership check — same as everywhere else, never trust the client's noteId alone
+    const note = await Note.findOne({ _id: noteId, owner: req.userId });
+    if (!note) {
+      return res.status(404).json({ error: 'Note not found' });
+    }
+
+    // Unlike the quiz prompt, we want plain text back, not JSON — so the
+    // instructions are simpler, but still explicit about format to avoid
+    // Claude adding a conversational preamble like "Sure, here's a rewrite:"
+    const prompt = `Rewrite the following study note to be clearer and more concise, making it easier to read and remember. Preserve every fact, term, and detail — do not add information that isn't in the original, and do not remove any key facts.
+
+Original note:
+"""
+${note.body}
+"""
+
+Respond with ONLY the rewritten note text. No preamble, no "Here is the rewritten version," no markdown headers, no explanation — just the rewritten text itself.`;
+
+    const response = await anthropic.messages.create({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const rewrittenText = response.content[0].text.trim();
+
+    if (!rewrittenText) {
+      return res.status(502).json({ error: 'AI returned an empty response. Please try again.' });
+    }
+
+    const rewrite = await Rewrite.create({
+      note: note._id,
+      owner: req.userId,
+      originalText: note.body,
+      rewrittenText,
+    });
+
+    res.status(201).json(rewrite);
+  } catch (err) {
+    // Identical error-handling shape to quizRoutes.js
+    if (err.status === 401) {
+      console.error('Anthropic auth error:', err.message);
+      return res.status(500).json({ error: 'AI service authentication failed (check API key)' });
+    }
+    if (err.status === 429) {
+      console.error('Anthropic rate limit hit:', err.message);
+      return res.status(429).json({ error: 'AI service is busy right now. Please try again shortly.' });
+    }
+    console.error('Rewrite generation error:', err);
+    res.status(500).json({ error: 'Failed to generate rewrite' });
+  }
+});
+
+module.exports = router;

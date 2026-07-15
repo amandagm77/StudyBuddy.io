@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import Quiz from '../components/Quiz';
+import RewritePreview from '../components/RewritePreview';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -14,6 +15,9 @@ export default function Dashboard() {
   const [activeQuiz, setActiveQuiz] = useState(null);
   const [quizLoading, setQuizLoading] = useState(false);
   const [quizError, setQuizError] = useState('');
+  const [activeRewrite, setActiveRewrite] = useState(null);
+  const [rewriteLoadingId, setRewriteLoadingId] = useState(null); // tracks which note is loading
+  const [rewriteError, setRewriteError] = useState('');
 
   useEffect(() => {
     loadSubjects();
@@ -44,6 +48,29 @@ export default function Dashboard() {
     await api.post('/notes', { ...newNote, subject: activeSubject._id });
     setNewNote({ title: '', body: '' });
     openSubject(activeSubject); // refresh notes list
+  }
+
+  async function generateRewrite(noteId) {
+    setRewriteLoadingId(noteId);
+    setRewriteError('');
+    try {
+      const res = await api.post('/rewrites/generate', { noteId });
+      setActiveRewrite(res.data);
+    } catch (err) {
+      setRewriteError(err.response?.data?.error || 'Failed to generate rewrite');
+    } finally {
+      setRewriteLoadingId(null);
+    }
+  }
+
+  async function applyRewrite(rewrite) {
+    // Reuse the existing note update route — no new backend endpoint needed
+    await api.put(`/notes/${rewrite.note}`, {
+      title: notes.find((n) => n._id === rewrite.note)?.title,
+      body: rewrite.rewrittenText,
+    });
+    setActiveRewrite(null);
+    openSubject(activeSubject); // refresh notes list to show the applied change
   }
 
   function toggleNoteSelection(noteId) {
@@ -115,9 +142,20 @@ export default function Dashboard() {
                   onChange={() => toggleNoteSelection(n._id)}
                 />
                 <strong>{n.title}</strong>: {n.body}
+                <button onClick={() => generateRewrite(n._id)} disabled={rewriteLoadingId === n._id}>
+                  {rewriteLoadingId === n._id ? 'Rewriting...' : 'Rewrite for Clarity'}
+                </button>
               </li>
             ))}
           </ul>
+          {rewriteError && <p style={{ color: 'red' }}>{rewriteError}</p>}
+          {activeRewrite && (
+            <RewritePreview
+              rewrite={activeRewrite}
+              onApply={applyRewrite}
+              onDiscard={() => setActiveRewrite(null)}
+            />
+          )}
 
           <button onClick={generateQuiz} disabled={quizLoading}>
             {quizLoading ? 'Generating quiz...' : 'Generate Quiz from Selected Notes'}

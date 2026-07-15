@@ -8,6 +8,7 @@ const authRoutes = require('./routes/authRoutes');
 const subjectRoutes = require('./routes/subjectRoutes');
 const noteRoutes = require('./routes/noteRoutes');
 const quizRoutes = require('./routes/quizRoutes');
+const rewriteRoutes = require('./routes/rewriteRoutes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/quizzes', quizRoutes);
+app.use('/api/rewrites', rewriteRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
