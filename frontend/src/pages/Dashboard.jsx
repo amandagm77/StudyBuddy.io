@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import Quiz from '../components/Quiz';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -9,6 +10,10 @@ export default function Dashboard() {
   const [activeSubject, setActiveSubject] = useState(null);
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState({ title: '', body: '' });
+  const [selectedNoteIds, setSelectedNoteIds] = useState([]);
+  const [activeQuiz, setActiveQuiz] = useState(null);
+  const [quizLoading, setQuizLoading] = useState(false);
+  const [quizError, setQuizError] = useState('');
 
   useEffect(() => {
     loadSubjects();
@@ -39,6 +44,33 @@ export default function Dashboard() {
     await api.post('/notes', { ...newNote, subject: activeSubject._id });
     setNewNote({ title: '', body: '' });
     openSubject(activeSubject); // refresh notes list
+  }
+
+  function toggleNoteSelection(noteId) {
+    setSelectedNoteIds((prev) =>
+      prev.includes(noteId) ? prev.filter((id) => id !== noteId) : [...prev, noteId]
+    );
+  }
+
+  async function generateQuiz() {
+    if (selectedNoteIds.length === 0) {
+      setQuizError('Select at least one note first');
+      return;
+    }
+    setQuizLoading(true);
+    setQuizError('');
+    try {
+      const res = await api.post('/quizzes/generate', {
+        subjectId: activeSubject._id,
+        noteIds: selectedNoteIds,
+        numQuestions: 5,
+      });
+      setActiveQuiz(res.data);
+    } catch (err) {
+      setQuizError(err.response?.data?.error || 'Failed to generate quiz');
+    } finally {
+      setQuizLoading(false);
+    }
   }
 
   return (
@@ -76,9 +108,23 @@ export default function Dashboard() {
           </form>
           <ul>
             {notes.map((n) => (
-              <li key={n._id}><strong>{n.title}</strong>: {n.body}</li>
+              <li key={n._id}>
+                <input
+                  type="checkbox"
+                  checked={selectedNoteIds.includes(n._id)}
+                  onChange={() => toggleNoteSelection(n._id)}
+                />
+                <strong>{n.title}</strong>: {n.body}
+              </li>
             ))}
           </ul>
+
+          <button onClick={generateQuiz} disabled={quizLoading}>
+            {quizLoading ? 'Generating quiz...' : 'Generate Quiz from Selected Notes'}
+          </button>
+          {quizError && <p style={{ color: 'red' }}>{quizError}</p>}
+
+          {activeQuiz && <Quiz quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />}
         </section>
       )}
     </div>
