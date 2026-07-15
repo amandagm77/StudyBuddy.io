@@ -3,6 +3,7 @@ import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import Quiz from '../components/Quiz';
 import RewritePreview from '../components/RewritePreview';
+import NoteEditor from '../components/NoteEditor';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -64,10 +65,12 @@ export default function Dashboard() {
   }
 
   async function applyRewrite(rewrite) {
-    // Reuse the existing note update route — no new backend endpoint needed
+    // Reuse the existing note update route — no new backend endpoint needed.
+    // Wrap in <p> so it stays valid HTML consistent with what the rich text editor expects.
+    const htmlBody = `<p>${rewrite.rewrittenText.replace(/\n/g, '<br>')}</p>`;
     await api.put(`/notes/${rewrite.note}`, {
       title: notes.find((n) => n._id === rewrite.note)?.title,
-      body: rewrite.rewrittenText,
+      body: htmlBody,
     });
     setActiveRewrite(null);
     openSubject(activeSubject); // refresh notes list to show the applied change
@@ -129,8 +132,11 @@ export default function Dashboard() {
           <form onSubmit={createNote}>
             <input placeholder="Note title" value={newNote.title}
               onChange={(e) => setNewNote({ ...newNote, title: e.target.value })} />
-            <textarea placeholder="Note content" value={newNote.body}
-              onChange={(e) => setNewNote({ ...newNote, body: e.target.value })} />
+            <NoteEditor
+              value={newNote.body}
+              onChange={(html) => setNewNote({ ...newNote, body: html })}
+              placeholder="Note content"
+            />
             <button type="submit">Add Note</button>
           </form>
           <ul>
@@ -141,7 +147,13 @@ export default function Dashboard() {
                   checked={selectedNoteIds.includes(n._id)}
                   onChange={() => toggleNoteSelection(n._id)}
                 />
-                <strong>{n.title}</strong>: {n.body}
+                <strong>{n.title}</strong>
+                {/* Rendering stored HTML from the rich text editor — safe here since
+                    it's always the logged-in user's own content, never another user's input */}
+                <div
+                  style={{ overflowWrap: 'break-word' }}
+                  dangerouslySetInnerHTML={{ __html: n.body }}
+                />
                 <button onClick={() => generateRewrite(n._id)} disabled={rewriteLoadingId === n._id}>
                   {rewriteLoadingId === n._id ? 'Rewriting...' : 'Rewrite for Clarity'}
                 </button>

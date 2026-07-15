@@ -12,6 +12,22 @@ const anthropic = process.env.ANTHROPIC_API_KEY
   ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   : null;
 
+// Notes now store rich-text HTML from the editor (bold/italic/highlight/bullets).
+// Claude should read clean text, not markup, so strip tags before building the prompt.
+function stripHtml(html) {
+  return html
+    .replace(/<\/(p|li|div)>/gi, '\n') // turn block-level closes into line breaks
+    .replace(/<li[^>]*>/gi, '• ') // keep bullet meaning as plain text
+    .replace(/<[^>]+>/g, '') // strip all remaining tags
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&') // must run after other &xxx; replacements, not before
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .trim();
+}
+
 // POST /api/quizzes/generate
 // Body: { subjectId: string, noteIds: string[], numQuestions: number }
 router.post('/generate', async (req, res) => {
@@ -35,7 +51,7 @@ router.post('/generate', async (req, res) => {
 
     // Combine note content into one block of study material for Claude to read
     const studyMaterial = notes
-      .map((n) => `Title: ${n.title}\n${n.body}`)
+      .map((n) => `Title: ${n.title}\n${stripHtml(n.body)}`)
       .join('\n\n---\n\n');
 
     // The prompt is the core "product" decision here: we ask for STRICT JSON,

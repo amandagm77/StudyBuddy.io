@@ -12,6 +12,21 @@ const anthropic = process.env.ANTHROPIC_API_KEY
   ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   : null;
 
+// Same stripping helper as quizRoutes.js — Claude should read clean text, not HTML markup
+function stripHtml(html) {
+  return html
+    .replace(/<\/(p|li|div)>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '• ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&') // must run after other &xxx; replacements, not before
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .trim();
+}
+
 // POST /api/rewrites/generate
 // Body: { noteId: string }
 router.post('/generate', async (req, res) => {
@@ -34,11 +49,13 @@ router.post('/generate', async (req, res) => {
     // Unlike the quiz prompt, we want plain text back, not JSON — so the
     // instructions are simpler, but still explicit about format to avoid
     // Claude adding a conversational preamble like "Sure, here's a rewrite:"
+    const plainText = stripHtml(note.body);
+
     const prompt = `Rewrite the following study note to be clearer and more concise, making it easier to read and remember. Preserve every fact, term, and detail — do not add information that isn't in the original, and do not remove any key facts.
 
 Original note:
 """
-${note.body}
+${plainText}
 """
 
 Respond with ONLY the rewritten note text. No preamble, no "Here is the rewritten version," no markdown headers, no explanation — just the rewritten text itself.`;
@@ -58,7 +75,7 @@ Respond with ONLY the rewritten note text. No preamble, no "Here is the rewritte
     const rewrite = await Rewrite.create({
       note: note._id,
       owner: req.userId,
-      originalText: note.body,
+      originalText: plainText,
       rewrittenText,
     });
 
