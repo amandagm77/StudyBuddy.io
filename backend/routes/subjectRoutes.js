@@ -1,5 +1,7 @@
 const express = require('express');
 const Subject = require('../models/Subject');
+const Note = require('../models/Note');
+const Quiz = require('../models/Quiz');
 const requireAuth = require('../middleware/auth');
 
 const router = express.Router();
@@ -27,6 +29,13 @@ router.delete('/:id', async (req, res) => {
   // by just guessing/changing the id in the URL
   const deleted = await Subject.findOneAndDelete({ _id: req.params.id, owner: req.userId });
   if (!deleted) return res.status(404).json({ error: 'Subject not found' });
+
+  // Cascade delete: without this, notes/quizzes referencing this subject would
+  // become orphaned in MongoDB — invisible in the UI but still taking up space
+  // and no longer tied to a real subject.
+  await Note.deleteMany({ subject: req.params.id, owner: req.userId });
+  await Quiz.deleteMany({ subject: req.params.id, owner: req.userId });
+
   res.json({ message: 'Deleted' });
 });
 

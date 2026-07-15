@@ -76,6 +76,28 @@ export default function Dashboard() {
     openSubject(activeSubject); // refresh notes list to show the applied change
   }
 
+  async function deleteSubject(subjectId) {
+    const confirmed = window.confirm('Delete this subject and all its notes/quizzes? This cannot be undone.');
+    if (!confirmed) return;
+
+    await api.delete(`/subjects/${subjectId}`);
+
+    // If the deleted subject was the one currently open, clear it out of view
+    if (activeSubject?._id === subjectId) {
+      setActiveSubject(null);
+      setNotes([]);
+    }
+    loadSubjects();
+  }
+
+  async function deleteNote(noteId) {
+    const confirmed = window.confirm('Delete this note? This cannot be undone.');
+    if (!confirmed) return;
+
+    await api.delete(`/notes/${noteId}`);
+    openSubject(activeSubject); // refresh notes list
+  }
+
   function toggleNoteSelection(noteId) {
     setSelectedNoteIds((prev) =>
       prev.includes(noteId) ? prev.filter((id) => id !== noteId) : [...prev, noteId]
@@ -121,6 +143,7 @@ export default function Dashboard() {
           {subjects.map((s) => (
             <li key={s._id}>
               <button onClick={() => openSubject(s)}>{s.title}</button>
+              <button onClick={() => deleteSubject(s._id)}>Delete</button>
             </li>
           ))}
         </ul>
@@ -157,6 +180,7 @@ export default function Dashboard() {
                 <button onClick={() => generateRewrite(n._id)} disabled={rewriteLoadingId === n._id}>
                   {rewriteLoadingId === n._id ? 'Rewriting...' : 'Rewrite for Clarity'}
                 </button>
+                <button onClick={() => deleteNote(n._id)}>Delete</button>
               </li>
             ))}
           </ul>
