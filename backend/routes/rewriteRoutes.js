@@ -1,6 +1,7 @@
 const express = require('express');
 const Anthropic = require('@anthropic-ai/sdk');
 const Note = require('../models/Note');
+const Cheatsheet = require('../models/Cheatsheet');
 const Rewrite = require('../models/Rewrite');
 const requireAuth = require('../middleware/auth');
 
@@ -28,37 +29,49 @@ function stripHtml(html) {
 }
 
 // POST /api/rewrites/generate
-// Body: { noteId: string }
+// Body: EITHER { noteId } OR { cheatsheetId, side: 'front' | 'back' }
 router.post('/generate', async (req, res) => {
   if (!anthropic) {
     return res.status(500).json({ error: 'AI service is not configured (missing API key)' });
   }
 
-  const { noteId } = req.body;
-  if (!noteId) {
-    return res.status(400).json({ error: 'noteId is required' });
+  const { noteId, cheatsheetId, side } = req.body;
+  if (!noteId && !cheatsheetId) {
+    return res.status(400).json({ error: 'Either noteId or cheatsheetId is required' });
+  }
+  if (cheatsheetId && side !== 'front' && side !== 'back') {
+    return res.status(400).json({ error: 'side must be "front" or "back" when using cheatsheetId' });
   }
 
   try {
-    // Ownership check — same as everywhere else, never trust the client's noteId alone
-    const note = await Note.findOne({ _id: noteId, owner: req.userId });
-    if (!note) {
-      return res.status(404).json({ error: 'Note not found' });
+    // Ownership check — same as everywhere else, never trust the client's id alone
+    let originalHtml;
+    if (noteId) {
+      const note = await Note.findOne({ _id: noteId, owner: req.userId });
+      if (!note) return res.status(404).json({ error: 'Note not found' });
+      originalHtml = note.body;
+    } else {
+      const cheatsheet = await Cheatsheet.findOne({ _id: cheatsheetId, owner: req.userId });
+      if (!cheatsheet) return res.status(404).json({ error: 'Cheatsheet not found' });
+      originalHtml = side === 'front' ? cheatsheet.frontContent : cheatsheet.backContent;
+    }
+
+    const plainText = stripHtml(originalHtml);
+    if (!plainText) {
+      return res.status(400).json({ error: 'There is no content to rewrite yet' });
     }
 
     // Unlike the quiz prompt, we want plain text back, not JSON — so the
     // instructions are simpler, but still explicit about format to avoid
     // Claude adding a conversational preamble like "Sure, here's a rewrite:"
-    const plainText = stripHtml(note.body);
+    const prompt = `Rewrite the following study material to be clearer and more concise, making it easier to read and remember. Preserve every fact, term, and detail — do not add information that isn't in the original, and do not remove any key facts.
 
-    const prompt = `Rewrite the following study note to be clearer and more concise, making it easier to read and remember. Preserve every fact, term, and detail — do not add information that isn't in the original, and do not remove any key facts.
-
-Original note:
+Original:
 """
 ${plainText}
 """
 
-Respond with ONLY the rewritten note text. No preamble, no "Here is the rewritten version," no markdown headers, no explanation — just the rewritten text itself.`;
+Respond with ONLY the rewritten text. No preamble, no "Here is the rewritten version," no markdown headers, no explanation — just the rewritten text itself.`;
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-6',
@@ -73,7 +86,8 @@ Respond with ONLY the rewritten note text. No preamble, no "Here is the rewritte
     }
 
     const rewrite = await Rewrite.create({
-      note: note._id,
+      note: noteId || undefined,
+      cheatsheet: cheatsheetId || undefined,
       owner: req.userId,
       originalText: plainText,
       rewrittenText,

@@ -2,6 +2,8 @@ const express = require('express');
 const Subject = require('../models/Subject');
 const Note = require('../models/Note');
 const Quiz = require('../models/Quiz');
+const Flashcard = require('../models/Flashcard');
+const Cheatsheet = require('../models/Cheatsheet');
 const requireAuth = require('../middleware/auth');
 
 const router = express.Router();
@@ -23,6 +25,13 @@ router.post('/', async (req, res) => {
   res.status(201).json(subject);
 });
 
+// GET /api/subjects/:id — fetch one subject (used by Flashcards/Cheatsheet pages)
+router.get('/:id', async (req, res) => {
+  const subject = await Subject.findOne({ _id: req.params.id, owner: req.userId });
+  if (!subject) return res.status(404).json({ error: 'Subject not found' });
+  res.json(subject);
+});
+
 // DELETE /api/subjects/:id
 router.delete('/:id', async (req, res) => {
   // Match on BOTH id and owner — prevents a user from deleting someone else's subject
@@ -35,6 +44,8 @@ router.delete('/:id', async (req, res) => {
   // and no longer tied to a real subject.
   await Note.deleteMany({ subject: req.params.id, owner: req.userId });
   await Quiz.deleteMany({ subject: req.params.id, owner: req.userId });
+  await Flashcard.deleteMany({ subject: req.params.id, owner: req.userId });
+  await Cheatsheet.deleteMany({ subject: req.params.id, owner: req.userId });
 
   res.json({ message: 'Deleted' });
 });

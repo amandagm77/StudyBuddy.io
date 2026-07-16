@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import Quiz from '../components/Quiz';
@@ -143,6 +144,8 @@ export default function Dashboard() {
           {subjects.map((s) => (
             <li key={s._id}>
               <button onClick={() => openSubject(s)}>{s.title}</button>
+              <Link to={`/subjects/${s._id}/flashcards`}>Flashcards</Link>
+              <Link to={`/subjects/${s._id}/cheatsheets`}>Cheat Sheets</Link>
               <button onClick={() => deleteSubject(s._id)}>Delete</button>
             </li>
           ))}

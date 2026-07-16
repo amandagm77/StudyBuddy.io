@@ -4,6 +4,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Flashcards from './pages/Flashcards';
+import Cheatsheets from './pages/Cheatsheets';
+import CheatsheetEditor from './pages/CheatsheetEditor';
 
 export default function App() {
   return (
@@ -17,6 +20,30 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/subjects/:subjectId/flashcards"
+            element={
+              <ProtectedRoute>
+                <Flashcards />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/subjects/:subjectId/cheatsheets"
+            element={
+              <ProtectedRoute>
+                <Cheatsheets />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cheatsheets/:cheatsheetId/edit"
+            element={
+              <ProtectedRoute>
+                <CheatsheetEditor />
               </ProtectedRoute>
             }
           />
