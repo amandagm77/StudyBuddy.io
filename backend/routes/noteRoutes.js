@@ -36,6 +36,16 @@ router.put('/:id', async (req, res) => {
   res.json(note);
 });
 
+// DELETE /api/notes?subject=<subjectId> — bulk delete all notes in a subject
+router.delete('/', async (req, res) => {
+  const { subject } = req.query;
+  if (!subject) {
+    return res.status(400).json({ error: 'subject query parameter is required' });
+  }
+  const result = await Note.deleteMany({ subject, owner: req.userId });
+  res.json({ message: 'Deleted', count: result.deletedCount });
+});
+
 // DELETE /api/notes/:id
 router.delete('/:id', async (req, res) => {
   const deleted = await Note.findOneAndDelete({ _id: req.params.id, owner: req.userId });

@@ -4,6 +4,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import SubjectNotes from './pages/SubjectNotes';
+import SubjectQuizzes from './pages/SubjectQuizzes';
 import Flashcards from './pages/Flashcards';
 import Cheatsheets from './pages/Cheatsheets';
 import CheatsheetEditor from './pages/CheatsheetEditor';
@@ -20,6 +22,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/subjects/:subjectId/notes"
+            element={
+              <ProtectedRoute>
+                <SubjectNotes />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/subjects/:subjectId/quizzes"
+            element={
+              <ProtectedRoute>
+                <SubjectQuizzes />
               </ProtectedRoute>
             }
           />

@@ -1,25 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
-import Quiz from '../components/Quiz';
-import RewritePreview from '../components/RewritePreview';
-import NoteEditor from '../components/NoteEditor';
+import Navbar from '../components/Navbar';
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [subjects, setSubjects] = useState([]);
   const [newSubjectTitle, setNewSubjectTitle] = useState('');
-  const [activeSubject, setActiveSubject] = useState(null);
-  const [notes, setNotes] = useState([]);
-  const [newNote, setNewNote] = useState({ title: '', body: '' });
-  const [selectedNoteIds, setSelectedNoteIds] = useState([]);
-  const [activeQuiz, setActiveQuiz] = useState(null);
-  const [quizLoading, setQuizLoading] = useState(false);
-  const [quizError, setQuizError] = useState('');
-  const [activeRewrite, setActiveRewrite] = useState(null);
-  const [rewriteLoadingId, setRewriteLoadingId] = useState(null); // tracks which note is loading
-  const [rewriteError, setRewriteError] = useState('');
 
   useEffect(() => {
     loadSubjects();
@@ -38,172 +27,76 @@ export default function Dashboard() {
     loadSubjects();
   }
 
-  async function openSubject(subject) {
-    setActiveSubject(subject);
-    const res = await api.get(`/notes?subject=${subject._id}`);
-    setNotes(res.data);
-  }
-
-  async function createNote(e) {
-    e.preventDefault();
-    if (!newNote.title.trim() || !newNote.body.trim()) return;
-    await api.post('/notes', { ...newNote, subject: activeSubject._id });
-    setNewNote({ title: '', body: '' });
-    openSubject(activeSubject); // refresh notes list
-  }
-
-  async function generateRewrite(noteId) {
-    setRewriteLoadingId(noteId);
-    setRewriteError('');
-    try {
-      const res = await api.post('/rewrites/generate', { noteId });
-      setActiveRewrite(res.data);
-    } catch (err) {
-      setRewriteError(err.response?.data?.error || 'Failed to generate rewrite');
-    } finally {
-      setRewriteLoadingId(null);
-    }
-  }
-
-  async function applyRewrite(rewrite) {
-    // Reuse the existing note update route — no new backend endpoint needed.
-    // Wrap in <p> so it stays valid HTML consistent with what the rich text editor expects.
-    const htmlBody = `<p>${rewrite.rewrittenText.replace(/\n/g, '<br>')}</p>`;
-    await api.put(`/notes/${rewrite.note}`, {
-      title: notes.find((n) => n._id === rewrite.note)?.title,
-      body: htmlBody,
-    });
-    setActiveRewrite(null);
-    openSubject(activeSubject); // refresh notes list to show the applied change
-  }
-
-  async function deleteSubject(subjectId) {
-    const confirmed = window.confirm('Delete this subject and all its notes/quizzes? This cannot be undone.');
-    if (!confirmed) return;
-
-    await api.delete(`/subjects/${subjectId}`);
-
-    // If the deleted subject was the one currently open, clear it out of view
-    if (activeSubject?._id === subjectId) {
-      setActiveSubject(null);
-      setNotes([]);
-    }
-    loadSubjects();
-  }
-
-  async function deleteNote(noteId) {
-    const confirmed = window.confirm('Delete this note? This cannot be undone.');
-    if (!confirmed) return;
-
-    await api.delete(`/notes/${noteId}`);
-    openSubject(activeSubject); // refresh notes list
-  }
-
-  function toggleNoteSelection(noteId) {
-    setSelectedNoteIds((prev) =>
-      prev.includes(noteId) ? prev.filter((id) => id !== noteId) : [...prev, noteId]
+  async function deleteSubject(subjectId, e) {
+    e.stopPropagation(); // don't trigger navigation to the subject when clicking Delete
+    const confirmed = window.confirm(
+      'Delete this subject and all its notes/quizzes/flashcards/cheatsheets? This cannot be undone.'
     );
-  }
-
-  async function generateQuiz() {
-    if (selectedNoteIds.length === 0) {
-      setQuizError('Select at least one note first');
-      return;
-    }
-    setQuizLoading(true);
-    setQuizError('');
-    try {
-      const res = await api.post('/quizzes/generate', {
-        subjectId: activeSubject._id,
-        noteIds: selectedNoteIds,
-        numQuestions: 5,
-      });
-      setActiveQuiz(res.data);
-    } catch (err) {
-      setQuizError(err.response?.data?.error || 'Failed to generate quiz');
-    } finally {
-      setQuizLoading(false);
-    }
+    if (!confirmed) return;
+    await api.delete(`/subjects/${subjectId}`);
+    loadSubjects();
   }
 
   return (
     <div>
-      <header>
-        <span>Welcome, {user?.name}</span>
-        <button onClick={logout}>Logout</button>
-      </header>
+      <Navbar />
+      <div className="container" style={{ paddingTop: '2.5rem', paddingBottom: '3rem' }}>
+        <h1 style={{ marginBottom: '0.25rem' }}>Welcome, {user?.name}!</h1>
+        <h3 style={{ color: 'var(--color-text-muted)', fontWeight: 500, marginBottom: '2rem' }}>
+          What are we studying today?
+        </h3>
 
-      <section>
-        <h3>Your Subjects</h3>
-        <form onSubmit={createSubject}>
-          <input placeholder="New subject title" value={newSubjectTitle}
-            onChange={(e) => setNewSubjectTitle(e.target.value)} />
-          <button type="submit">Add Subject</button>
-        </form>
-        <ul>
-          {subjects.map((s) => (
-            <li key={s._id}>
-              <button onClick={() => openSubject(s)}>{s.title}</button>
-              <Link to={`/subjects/${s._id}/flashcards`}>Flashcards</Link>
-              <Link to={`/subjects/${s._id}/cheatsheets`}>Cheat Sheets</Link>
-              <button onClick={() => deleteSubject(s._id)}>Delete</button>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {activeSubject && (
-        <section>
-          <h3>Notes for {activeSubject.title}</h3>
-          <form onSubmit={createNote}>
-            <input placeholder="Note title" value={newNote.title}
-              onChange={(e) => setNewNote({ ...newNote, title: e.target.value })} />
-            <NoteEditor
-              value={newNote.body}
-              onChange={(html) => setNewNote({ ...newNote, body: html })}
-              placeholder="Note content"
-            />
-            <button type="submit">Add Note</button>
-          </form>
-          <ul>
-            {notes.map((n) => (
-              <li key={n._id}>
-                <input
-                  type="checkbox"
-                  checked={selectedNoteIds.includes(n._id)}
-                  onChange={() => toggleNoteSelection(n._id)}
-                />
-                <strong>{n.title}</strong>
-                {/* Rendering stored HTML from the rich text editor — safe here since
-                    it's always the logged-in user's own content, never another user's input */}
-                <div
-                  style={{ overflowWrap: 'break-word' }}
-                  dangerouslySetInnerHTML={{ __html: n.body }}
-                />
-                <button onClick={() => generateRewrite(n._id)} disabled={rewriteLoadingId === n._id}>
-                  {rewriteLoadingId === n._id ? 'Rewriting...' : 'Rewrite for Clarity'}
-                </button>
-                <button onClick={() => deleteNote(n._id)}>Delete</button>
-              </li>
-            ))}
-          </ul>
-          {rewriteError && <p style={{ color: 'red' }}>{rewriteError}</p>}
-          {activeRewrite && (
-            <RewritePreview
-              rewrite={activeRewrite}
-              onApply={applyRewrite}
-              onDiscard={() => setActiveRewrite(null)}
-            />
-          )}
-
-          <button onClick={generateQuiz} disabled={quizLoading}>
-            {quizLoading ? 'Generating quiz...' : 'Generate Quiz from Selected Notes'}
+        <form
+          onSubmit={createSubject}
+          style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', maxWidth: '480px' }}
+        >
+          <input
+            className="input"
+            placeholder="New subject title"
+            value={newSubjectTitle}
+            onChange={(e) => setNewSubjectTitle(e.target.value)}
+          />
+          <button className="btn btn-primary" type="submit" style={{ whiteSpace: 'nowrap' }}>
+            Add Subject
           </button>
-          {quizError && <p style={{ color: 'red' }}>{quizError}</p>}
+        </form>
 
-          {activeQuiz && <Quiz quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />}
-        </section>
-      )}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+            gap: '1rem',
+          }}
+        >
+          {subjects.map((s) => (
+            <div
+              key={s._id}
+              className="card"
+              onClick={() => navigate(`/subjects/${s._id}/notes`)}
+              style={{ cursor: 'pointer', position: 'relative' }}
+            >
+              <h3 style={{ marginBottom: 0 }}>{s.title}</h3>
+              <button
+                className="btn btn-danger"
+                onClick={(e) => deleteSubject(s._id, e)}
+                style={{
+                  position: 'absolute',
+                  top: '0.75rem',
+                  right: '0.75rem',
+                  padding: '0.25rem 0.6rem',
+                  fontSize: '0.8rem',
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {subjects.length === 0 && (
+          <p className="muted">You don't have any subjects yet — add one above to get started.</p>
+        )}
+      </div>
     </div>
   );
 }

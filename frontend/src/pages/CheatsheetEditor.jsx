@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import api from '../api/axios';
+import Navbar from '../components/Navbar';
+import SubjectNav from '../components/SubjectNav';
 import NoteEditor from '../components/NoteEditor';
 import RewritePreview from '../components/RewritePreview';
 
@@ -8,17 +10,19 @@ import RewritePreview from '../components/RewritePreview';
 // actual physical allowed-notes sheet a student would print for an exam.
 const pageStyle = {
   width: '8.5in',
+  maxWidth: '100%',
   minHeight: '11in',
   margin: '1rem auto',
   padding: '0.5in',
-  border: '1px solid #999',
+  border: '1px solid var(--color-border)',
   background: 'white',
-  boxShadow: '0 0 8px rgba(0,0,0,0.15)',
+  boxShadow: 'var(--shadow-md)',
 };
 
 export default function CheatsheetEditor() {
   const { cheatsheetId } = useParams();
   const [sheet, setSheet] = useState(null);
+  const [subjectTitle, setSubjectTitle] = useState('');
   const [saving, setSaving] = useState(false);
   const [rewriteError, setRewriteError] = useState('');
   const [rewriteLoadingSide, setRewriteLoadingSide] = useState(null);
@@ -31,6 +35,8 @@ export default function CheatsheetEditor() {
   async function load() {
     const res = await api.get(`/cheatsheets/${cheatsheetId}`);
     setSheet(res.data);
+    const subjectRes = await api.get(`/subjects/${res.data.subject}`);
+    setSubjectTitle(subjectRes.data.title);
   }
 
   async function save() {
@@ -64,46 +70,64 @@ export default function CheatsheetEditor() {
     setActiveRewrite(null);
   }
 
-  if (!sheet) return <p>Loading...</p>;
+  if (!sheet) return <div><Navbar /><div className="container"><p>Loading...</p></div></div>;
 
   return (
     <div>
-      <Link to={`/subjects/${sheet.subject}/cheatsheets`}>&larr; Back to Cheat Sheets</Link>
-      <h2>{sheet.title}</h2>
-      <button onClick={save} disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
+      <Navbar />
+      <div className="container" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
+        <SubjectNav subjectId={sheet.subject} subjectTitle={subjectTitle} />
 
-      <h3>Side 1 (Front)</h3>
-      <div style={pageStyle}>
-        <NoteEditor
-          value={sheet.frontContent}
-          onChange={(html) => setSheet({ ...sheet, frontContent: html })}
-          placeholder="Front side content..."
-        />
+        <div className="card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ marginBottom: 0 }}>{sheet.title}</h3>
+            <button className="btn btn-primary" onClick={save} disabled={saving}>
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+
+          <h4 style={{ marginTop: '1.5rem' }}>Side 1 (Front)</h4>
+          <div style={pageStyle}>
+            <NoteEditor
+              value={sheet.frontContent}
+              onChange={(html) => setSheet({ ...sheet, frontContent: html })}
+              placeholder="Front side content..."
+            />
+          </div>
+          <button
+            className="btn btn-secondary"
+            onClick={() => generateRewrite('front')}
+            disabled={rewriteLoadingSide === 'front'}
+          >
+            {rewriteLoadingSide === 'front' ? 'Rewriting...' : 'Rewrite Front for Clarity'}
+          </button>
+
+          <h4 style={{ marginTop: '2rem' }}>Side 2 (Back)</h4>
+          <div style={pageStyle}>
+            <NoteEditor
+              value={sheet.backContent}
+              onChange={(html) => setSheet({ ...sheet, backContent: html })}
+              placeholder="Back side content..."
+            />
+          </div>
+          <button
+            className="btn btn-secondary"
+            onClick={() => generateRewrite('back')}
+            disabled={rewriteLoadingSide === 'back'}
+          >
+            {rewriteLoadingSide === 'back' ? 'Rewriting...' : 'Rewrite Back for Clarity'}
+          </button>
+
+          {rewriteError && <p className="error-text">{rewriteError}</p>}
+          {activeRewrite && (
+            <RewritePreview
+              rewrite={activeRewrite}
+              onApply={applyRewrite}
+              onDiscard={() => setActiveRewrite(null)}
+            />
+          )}
+        </div>
       </div>
-      <button onClick={() => generateRewrite('front')} disabled={rewriteLoadingSide === 'front'}>
-        {rewriteLoadingSide === 'front' ? 'Rewriting...' : 'Rewrite Front for Clarity'}
-      </button>
-
-      <h3>Side 2 (Back)</h3>
-      <div style={pageStyle}>
-        <NoteEditor
-          value={sheet.backContent}
-          onChange={(html) => setSheet({ ...sheet, backContent: html })}
-          placeholder="Back side content..."
-        />
-      </div>
-      <button onClick={() => generateRewrite('back')} disabled={rewriteLoadingSide === 'back'}>
-        {rewriteLoadingSide === 'back' ? 'Rewriting...' : 'Rewrite Back for Clarity'}
-      </button>
-
-      {rewriteError && <p style={{ color: 'red' }}>{rewriteError}</p>}
-      {activeRewrite && (
-        <RewritePreview
-          rewrite={activeRewrite}
-          onApply={applyRewrite}
-          onDiscard={() => setActiveRewrite(null)}
-        />
-      )}
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../api/axios';
+import Navbar from '../components/Navbar';
+import SubjectNav from '../components/SubjectNav';
 
 const MAX_SHEETS = 5;
 
@@ -42,32 +44,52 @@ export default function Cheatsheets() {
     loadSheets();
   }
 
+  if (!subject) return <div><Navbar /><div className="container"><p>Loading...</p></div></div>;
+
   return (
     <div>
-      <Link to="/dashboard">&larr; Back to Dashboard</Link>
-      <h2>Cheat Sheets {subject && `— ${subject.title}`}</h2>
-      <p>{sheets.length} / {MAX_SHEETS} cheatsheets used</p>
+      <Navbar />
+      <div className="container" style={{ paddingTop: '2rem', paddingBottom: '3rem' }}>
+        <SubjectNav subjectId={subjectId} subjectTitle={subject.title} />
 
-      {sheets.length < MAX_SHEETS && (
-        <form onSubmit={createSheet}>
-          <input
-            placeholder="e.g. Midterm 1, Final Exam"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-          />
-          <button type="submit">Create Cheat Sheet</button>
-        </form>
-      )}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+        <div className="card">
+          <p className="muted">{sheets.length} / {MAX_SHEETS} cheatsheets used</p>
 
-      <ul>
-        {sheets.map((s) => (
-          <li key={s._id}>
-            <Link to={`/cheatsheets/${s._id}/edit`}>{s.title}</Link>
-            <button onClick={() => deleteSheet(s._id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+          {sheets.length < MAX_SHEETS && (
+            <form onSubmit={createSheet} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              <input
+                className="input"
+                placeholder="e.g. Midterm 1, Final Exam"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+              />
+              <button className="btn btn-primary" type="submit" style={{ whiteSpace: 'nowrap' }}>
+                Create Cheat Sheet
+              </button>
+            </form>
+          )}
+          {error && <p className="error-text">{error}</p>}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {sheets.map((s) => (
+              <div
+                key={s._id}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '0.75rem 1rem',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 'var(--radius-sm)',
+                }}
+              >
+                <Link to={`/cheatsheets/${s._id}/edit`} style={{ fontWeight: 600 }}>{s.title}</Link>
+                <button className="btn btn-danger" onClick={() => deleteSheet(s._id)}>Delete</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
