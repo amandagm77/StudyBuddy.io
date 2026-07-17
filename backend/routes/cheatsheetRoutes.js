@@ -55,6 +55,16 @@ router.put('/:id', async (req, res) => {
   res.json(cheatsheet);
 });
 
+// DELETE /api/cheatsheets?subject=<subjectId> — bulk delete all cheatsheets in a subject
+router.delete('/', async (req, res) => {
+  const { subject } = req.query;
+  if (!subject) {
+    return res.status(400).json({ error: 'subject query parameter is required' });
+  }
+  const result = await Cheatsheet.deleteMany({ subject, owner: req.userId });
+  res.json({ message: 'Deleted', count: result.deletedCount });
+});
+
 // DELETE /api/cheatsheets/:id
 router.delete('/:id', async (req, res) => {
   const deleted = await Cheatsheet.findOneAndDelete({ _id: req.params.id, owner: req.userId });

@@ -6,6 +6,7 @@ import SubjectNav from '../components/SubjectNav';
 import Quiz from '../components/Quiz';
 import RewritePreview from '../components/RewritePreview';
 import NoteEditor from '../components/NoteEditor';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function SubjectNotes() {
   const { subjectId } = useParams();
@@ -20,6 +21,8 @@ export default function SubjectNotes() {
   const [activeRewrite, setActiveRewrite] = useState(null); // includes .note so we know which note it belongs to
   const [rewriteLoadingId, setRewriteLoadingId] = useState(null);
   const [rewriteError, setRewriteError] = useState('');
+  const [noteError, setNoteError] = useState('');
+  const [confirmModal, setConfirmModal] = useState(null);
 
   const quizRef = useRef(null); // used to auto-scroll to the generated quiz
 
@@ -42,29 +45,43 @@ export default function SubjectNotes() {
   }
 
   async function createNote(e) {
-    e.preventDefault();
-    if (!newNote.title.trim() || !newNote.body.trim()) return;
-    await api.post('/notes', { ...newNote, subject: subjectId });
-    setNewNote({ title: '', body: '' });
-    setFormKey((k) => k + 1);
-    loadNotes();
+  e.preventDefault();
+  if (!newNote.title.trim()) {
+    setNoteError("Note title can't be blank.");
+    return;
+  }
+  if (!newNote.body.trim()) {
+    setNoteError("Note content can't be blank.");
+    return;
+  }
+  setNoteError('');
+  await api.post('/notes', { ...newNote, subject: subjectId });
+  setNewNote({ title: '', body: '' });
+  setFormKey((k) => k + 1);
+  loadNotes();
   }
 
-  async function deleteNote(noteId) {
-    const confirmed = window.confirm('Delete this note?');
-    if (!confirmed) return;
-    await api.delete(`/notes/${noteId}`);
-    loadNotes();
+  function deleteNote(noteId) {
+  setConfirmModal({
+    message: 'Delete this note?',
+    onConfirm: async () => {
+      await api.delete(`/notes/${noteId}`);
+      setConfirmModal(null);
+      loadNotes();
+    },
+  });
   }
 
-  async function deleteAllNotes() {
-    const confirmed = window.confirm(
-      `Are you sure? This will permanently delete all ${notes.length} notes in this subject.`
-    );
-    if (!confirmed) return;
-    await api.delete(`/notes?subject=${subjectId}`);
-    setSelectedNoteIds([]);
-    loadNotes();
+  function deleteAllNotes() {
+  setConfirmModal({
+    message: `Are you sure? This will permanently delete all ${notes.length} notes in this subject.`,
+    onConfirm: async () => {
+      await api.delete(`/notes?subject=${subjectId}`);
+      setSelectedNoteIds([]);
+      setConfirmModal(null);
+      loadNotes();
+    },
+  });
   }
 
   function toggleNoteSelection(noteId) {
@@ -153,7 +170,7 @@ export default function SubjectNotes() {
             <div className="form-group">
               <input
                 className="input"
-                placeholder="Note title"
+                placeholder="Enter Note title here"
                 value={newNote.title}
                 onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
               />
@@ -161,11 +178,12 @@ export default function SubjectNotes() {
             <NoteEditor
               value={newNote.body}
               onChange={(html) => setNewNote({ ...newNote, body: html })}
-              placeholder="Note content"
+              placeholder="Note contents"
             />
             <button className="btn btn-primary" type="submit" style={{ marginTop: '0.75rem' }}>
               Add Note
             </button>
+            {noteError && <p className="error-text">{noteError}</p>}
           </form>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -222,6 +240,13 @@ export default function SubjectNotes() {
           </div>
         </div>
       </div>
+      {confirmModal && (
+        <ConfirmModal
+          message={confirmModal.message}
+          onConfirm={confirmModal.onConfirm}
+          onCancel={() => setConfirmModal(null)}
+        />
+        )}
     </div>
   );
 }

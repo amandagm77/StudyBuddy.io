@@ -32,6 +32,16 @@ router.get('/:id', async (req, res) => {
   res.json(subject);
 });
 
+// DELETE /api/subjects — bulk delete ALL subjects and everything under them
+router.delete('/', async (req, res) => {
+  await Subject.deleteMany({ owner: req.userId });
+  await Note.deleteMany({ owner: req.userId });
+  await Quiz.deleteMany({ owner: req.userId });
+  await Flashcard.deleteMany({ owner: req.userId });
+  await Cheatsheet.deleteMany({ owner: req.userId });
+  res.json({ message: 'Deleted' });
+});
+
 // DELETE /api/subjects/:id
 router.delete('/:id', async (req, res) => {
   // Match on BOTH id and owner — prevents a user from deleting someone else's subject

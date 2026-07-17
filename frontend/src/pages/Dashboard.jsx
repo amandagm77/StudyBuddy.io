@@ -3,12 +3,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
+import ConfirmModal from '../components/ConfirmModal';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [subjects, setSubjects] = useState([]);
   const [newSubjectTitle, setNewSubjectTitle] = useState('');
+  const [subjectError, setSubjectError] = useState('');
+  const [confirmModal, setConfirmModal] = useState(null);
 
   useEffect(() => {
     loadSubjects();
@@ -20,21 +23,38 @@ export default function Dashboard() {
   }
 
   async function createSubject(e) {
-    e.preventDefault();
-    if (!newSubjectTitle.trim()) return;
-    await api.post('/subjects', { title: newSubjectTitle });
-    setNewSubjectTitle('');
-    loadSubjects();
+  e.preventDefault();
+  if (!newSubjectTitle.trim()) {
+    setSubjectError("Subject title can't be blank.");
+    return;
+  }
+  setSubjectError('');
+  await api.post('/subjects', { title: newSubjectTitle });
+  setNewSubjectTitle('');
+  loadSubjects();
   }
 
-  async function deleteSubject(subjectId, e) {
-    e.stopPropagation(); // don't trigger navigation to the subject when clicking Delete
-    const confirmed = window.confirm(
-      'Delete this subject and all its notes/quizzes/flashcards/cheatsheets? This cannot be undone.'
-    );
-    if (!confirmed) return;
-    await api.delete(`/subjects/${subjectId}`);
-    loadSubjects();
+  function deleteAllSubjects() {
+  setConfirmModal({
+    message: `Are you sure? This will permanently delete all ${subjects.length} subjects and everything inside them (notes, quizzes, flashcards, cheatsheets). This cannot be undone.`,
+    onConfirm: async () => {
+      await api.delete('/subjects');
+      setConfirmModal(null);
+      loadSubjects();
+    },
+  });
+  }
+
+  function deleteSubject(subjectId, e) {
+  e.stopPropagation();
+  setConfirmModal({
+    message: 'Delete this subject and all its notes/quizzes/flashcards/cheatsheets? This cannot be undone.',
+    onConfirm: async () => {
+      await api.delete(`/subjects/${subjectId}`);
+      setConfirmModal(null);
+      loadSubjects();
+    },
+  });
   }
 
   return (
@@ -46,20 +66,29 @@ export default function Dashboard() {
           What are we studying today?
         </h3>
 
-        <form
-          onSubmit={createSubject}
-          style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', maxWidth: '480px' }}
+        <div style={{ marginBottom: '2rem', maxWidth: '480px' }}>
+          <form onSubmit={createSubject} style={{ display: 'flex', gap: '0.75rem' }}>
+            <input
+              className="input"
+              placeholder="Enter Subject title here"
+              value={newSubjectTitle}
+              onChange={(e) => setNewSubjectTitle(e.target.value)}
+            />
+            <button className="btn btn-primary" type="submit" style={{ whiteSpace: 'nowrap' }}>
+              Add Subject
+            </button>
+          </form>
+          {subjectError && <p className="error-text" style={{ marginTop: '0.5rem', marginBottom: 0 }}>{subjectError}</p>}
+        </div>
+
+        <button
+          className="btn btn-danger"
+          onClick={deleteAllSubjects}
+          disabled={subjects.length === 0}
+          style={{ marginBottom: '1.5rem' }}
         >
-          <input
-            className="input"
-            placeholder="New subject title"
-            value={newSubjectTitle}
-            onChange={(e) => setNewSubjectTitle(e.target.value)}
-          />
-          <button className="btn btn-primary" type="submit" style={{ whiteSpace: 'nowrap' }}>
-            Add Subject
-          </button>
-        </form>
+        Delete All Subjects
+        </button>
 
         <div
           style={{
@@ -97,6 +126,13 @@ export default function Dashboard() {
           <p className="muted">You don't have any subjects yet — add one above to get started.</p>
         )}
       </div>
+      {confirmModal && (
+        <ConfirmModal
+          message={confirmModal.message}
+          onConfirm={confirmModal.onConfirm}
+          onCancel={() => setConfirmModal(null)}
+        />
+        )}
     </div>
   );
 }

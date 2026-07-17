@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../api/axios';
 import Navbar from '../components/Navbar';
 import SubjectNav from '../components/SubjectNav';
+import ConfirmModal from '../components/ConfirmModal';
 
 const MAX_SHEETS = 5;
 
@@ -12,6 +13,7 @@ export default function Cheatsheets() {
   const [sheets, setSheets] = useState([]);
   const [newTitle, setNewTitle] = useState('');
   const [error, setError] = useState('');
+  const [confirmModal, setConfirmModal] = useState(null);
 
   useEffect(() => {
     api.get(`/subjects/${subjectId}`).then((res) => setSubject(res.data));
@@ -24,24 +26,42 @@ export default function Cheatsheets() {
   }
 
   async function createSheet(e) {
-    e.preventDefault();
-    setError('');
-    if (!newTitle.trim()) return;
-
-    try {
-      await api.post('/cheatsheets', { title: newTitle, subject: subjectId });
-      setNewTitle('');
-      loadSheets();
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create cheatsheet');
-    }
+  e.preventDefault();
+  setError('');
+  if (!newTitle.trim()) {
+    setError("Cheat sheet title can't be blank.");
+    return;
   }
 
-  async function deleteSheet(id) {
-    const confirmed = window.confirm('Delete this cheatsheet?');
-    if (!confirmed) return;
-    await api.delete(`/cheatsheets/${id}`);
+  try {
+    await api.post('/cheatsheets', { title: newTitle, subject: subjectId });
+    setNewTitle('');
     loadSheets();
+  } catch (err) {
+    setError(err.response?.data?.error || 'Failed to create cheatsheet');
+  }
+  }
+
+  function deleteAllSheets() {
+  setConfirmModal({
+    message: `Are you sure? This will permanently delete all ${sheets.length} cheatsheets in this subject.`,
+    onConfirm: async () => {
+      await api.delete(`/cheatsheets?subject=${subjectId}`);
+      setConfirmModal(null);
+      loadSheets();
+    },
+  });
+  }
+
+  function deleteSheet(id) {
+  setConfirmModal({
+    message: 'Delete this cheatsheet?',
+    onConfirm: async () => {
+      await api.delete(`/cheatsheets/${id}`);
+      setConfirmModal(null);
+      loadSheets();
+    },
+  });
   }
 
   if (!subject) return <div><Navbar /><div className="container"><p>Loading...</p></div></div>;
@@ -70,6 +90,15 @@ export default function Cheatsheets() {
           )}
           {error && <p className="error-text">{error}</p>}
 
+          <button
+            className="btn btn-danger"
+            onClick={deleteAllSheets}
+            disabled={sheets.length === 0}
+            style={{ marginBottom: '1rem' }}
+          >
+          Delete All
+          </button>
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {sheets.map((s) => (
               <div
@@ -90,6 +119,13 @@ export default function Cheatsheets() {
           </div>
         </div>
       </div>
+      {confirmModal && (
+        <ConfirmModal
+          message={confirmModal.message}
+          onConfirm={confirmModal.onConfirm}
+          onCancel={() => setConfirmModal(null)}
+        />
+        )}
     </div>
   );
 }

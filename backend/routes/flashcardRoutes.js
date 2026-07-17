@@ -38,6 +38,16 @@ router.post('/', async (req, res) => {
   res.status(201).json(flashcard);
 });
 
+// DELETE /api/flashcards?subject=<subjectId> — bulk delete all flashcards in a subject
+router.delete('/', async (req, res) => {
+  const { subject } = req.query;
+  if (!subject) {
+    return res.status(400).json({ error: 'subject query parameter is required' });
+  }
+  const result = await Flashcard.deleteMany({ subject, owner: req.userId });
+  res.json({ message: 'Deleted', count: result.deletedCount });
+});
+
 // DELETE /api/flashcards/:id
 router.delete('/:id', async (req, res) => {
   const deleted = await Flashcard.findOneAndDelete({ _id: req.params.id, owner: req.userId });

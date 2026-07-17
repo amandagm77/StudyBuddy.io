@@ -4,6 +4,7 @@ import api from '../api/axios';
 import Navbar from '../components/Navbar';
 import SubjectNav from '../components/SubjectNav';
 import FlashcardStudy from '../components/FlashcardStudy';
+import ConfirmModal from '../components/ConfirmModal';
 
 const MAX_CHARS = 100;
 const MAX_CARDS = 15;
@@ -15,6 +16,7 @@ export default function Flashcards() {
   const [form, setForm] = useState({ front: '', back: '' });
   const [error, setError] = useState('');
   const [studyMode, setStudyMode] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(null);
 
   useEffect(() => {
     api.get(`/subjects/${subjectId}`).then((res) => setSubject(res.data));
@@ -27,24 +29,46 @@ export default function Flashcards() {
   }
 
   async function createCard(e) {
-    e.preventDefault();
-    setError('');
-    if (!form.front.trim() || !form.back.trim()) return;
-
-    try {
-      await api.post('/flashcards', { ...form, subject: subjectId });
-      setForm({ front: '', back: '' });
-      loadCards();
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create flashcard');
-    }
+  e.preventDefault();
+  setError('');
+  if (!form.front.trim()) {
+    setError("Front side can't be blank.");
+    return;
+  }
+  if (!form.back.trim()) {
+    setError("Back side can't be blank.");
+    return;
   }
 
-  async function deleteCard(id) {
-    const confirmed = window.confirm('Delete this flashcard?');
-    if (!confirmed) return;
-    await api.delete(`/flashcards/${id}`);
+  try {
+    await api.post('/flashcards', { ...form, subject: subjectId });
+    setForm({ front: '', back: '' });
     loadCards();
+  } catch (err) {
+    setError(err.response?.data?.error || 'Failed to create flashcard');
+  }
+  }
+
+  function deleteAllCards() {
+  setConfirmModal({
+    message: `Are you sure? This will permanently delete all ${cards.length} flashcards in this subject.`,
+    onConfirm: async () => {
+      await api.delete(`/flashcards?subject=${subjectId}`);
+      setConfirmModal(null);
+      loadCards();
+    },
+  });
+  }
+
+  function deleteCard(id) {
+  setConfirmModal({
+    message: 'Delete this flashcard?',
+    onConfirm: async () => {
+      await api.delete(`/flashcards/${id}`);
+      setConfirmModal(null);
+      loadCards();
+    },
+  });
   }
 
   if (!subject) return <div><Navbar /><div className="container"><p>Loading...</p></div></div>;
@@ -69,6 +93,14 @@ export default function Flashcards() {
                 style={{ marginBottom: '1.5rem' }}
               >
                 Study Mode
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={deleteAllCards}
+                disabled={cards.length === 0}
+                style={{ marginBottom: '1.5rem', marginLeft: '0.75rem' }}
+              >
+                Delete All
               </button>
 
               {cards.length < MAX_CARDS && (
@@ -133,6 +165,13 @@ export default function Flashcards() {
           )}
         </div>
       </div>
+      {confirmModal && (
+        <ConfirmModal
+          message={confirmModal.message}
+          onConfirm={confirmModal.onConfirm}
+          onCancel={() => setConfirmModal(null)}
+        />
+        )}
     </div>
   );
 }
