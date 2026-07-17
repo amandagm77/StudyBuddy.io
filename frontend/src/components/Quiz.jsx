@@ -1,11 +1,12 @@
 import { useState } from 'react';
 
-export default function Quiz({ quiz, onClose }) {
-  const [answers, setAnswers] = useState({}); // { questionIndex: selectedOptionIndex }
-  const [submitted, setSubmitted] = useState(false);
+export default function Quiz({ quiz, onClose, mode = 'take' }) {
+  const isReview = mode === 'review';
+  const [answers, setAnswers] = useState({});
+  const [submitted, setSubmitted] = useState(isReview);
 
   function selectAnswer(qIndex, optionIndex) {
-    if (submitted) return; // lock answers after submission
+    if (isReview || submitted) return;
     setAnswers({ ...answers, [qIndex]: optionIndex });
   }
 
@@ -14,7 +15,6 @@ export default function Quiz({ quiz, onClose }) {
     0
   );
 
-  // Determines the full button style for an option, post-submission
   function getOptionStyle(qIndex, oIndex, correctIndex) {
     const isSelected = answers[qIndex] === oIndex;
     const isCorrect = oIndex === correctIndex;
@@ -27,7 +27,7 @@ export default function Quiz({ quiz, onClose }) {
       marginBottom: '0.5rem',
       borderRadius: 'var(--radius-sm)',
       border: '1px solid var(--color-border)',
-      background: isSelected ? '#e5e7eb' : 'var(--color-surface)', // light grey while chosen but unsubmitted
+      background: isSelected ? '#e5e7eb' : 'var(--color-surface)',
       color: 'var(--color-text)',
       cursor: submitted ? 'default' : 'pointer',
       fontWeight: isSelected ? 600 : 400,
@@ -35,9 +35,6 @@ export default function Quiz({ quiz, onClose }) {
 
     if (!submitted) return base;
 
-    // After submission: color the whole button, not just the text —
-    // green for the correct answer, red for a wrong pick, so the
-    // right/wrong signal is visible at a glance rather than easy to miss
     if (isCorrect) {
       return {
         ...base,
@@ -61,7 +58,7 @@ export default function Quiz({ quiz, onClose }) {
 
   return (
     <div className="card" style={{ marginTop: '1.5rem' }}>
-      <h3>Quiz</h3>
+      <h3>{isReview ? 'Reviewing Quiz' : 'Quiz'}</h3>
       {quiz.questions.map((q, qIndex) => (
         <div key={qIndex} style={{ marginBottom: '1.75rem' }}>
           <p style={{ fontWeight: 600 }}>{qIndex + 1}. {q.question}</p>
@@ -80,9 +77,9 @@ export default function Quiz({ quiz, onClose }) {
 
       {!submitted ? (
         <button className="btn btn-primary" onClick={() => setSubmitted(true)}>Submit Quiz</button>
-      ) : (
+      ) : !isReview ? (
         <p style={{ fontWeight: 600, fontSize: '1.1rem' }}>Score: {score} / {quiz.questions.length}</p>
-      )}
+      ) : null}
       <button className="btn btn-secondary" onClick={onClose} style={{ marginLeft: '0.75rem' }}>
         Close
       </button>

@@ -7,22 +7,30 @@ export default function Navbar() {
   return (
     <header
       style={{
-        background: 'var(--color-header-bg)',
-        padding: '0.75rem 1.5rem',
-        display: 'flex',
+        position: 'relative',
+        background: 'radial-gradient(ellipse 700px 160% at center, #ffffff 0%, var(--color-header-gradient-edge) 100%)',
+        padding: '1rem 1.5rem',
+        display: 'grid',
+        gridTemplateColumns: '1fr auto 1fr',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        borderBottom: '1px solid var(--color-border)',
       }}
     >
-      <Link to="/dashboard">
-        <img src="/logos/logo-horizontal.png" alt="StudyBuddy.io" style={{ height: '36px' }} />
+      <div />
+
+      <Link to="/dashboard" style={{ justifySelf: 'center' }}>
+        <img src="/logos/logo-horizontal.png" alt="StudyBuddy.io" style={{ height: '44px' }} />
       </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <span style={{ color: 'var(--color-text-on-dark)', fontSize: '0.9rem' }}>
+      <div style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <span style={{ color: 'var(--brand-dark)', fontWeight: 600, fontSize: '0.9rem' }}>
           {user?.name}
         </span>
-        <button className="btn btn-secondary" onClick={logout} style={{ color: 'var(--color-text-on-dark)' }}>
+        <button
+          className="btn btn-secondary"
+          onClick={logout}
+          style={{ color: 'var(--brand-dark)', borderColor: 'var(--brand-dark)' }}
+        >
           Logout
         </button>
       </div>

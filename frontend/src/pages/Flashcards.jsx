@@ -98,16 +98,32 @@ export default function Flashcards() {
               )}
               {error && <p className="error-text">{error}</p>}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                  gap: '1rem',
+                }}
+              >
                 {cards.map((c) => (
-                  <div
-                    key={c._id}
-                    style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '1rem' }}
-                  >
-                    {/* Bold + larger font for quick-glance review, per the spec */}
-                    <div style={{ fontWeight: 'bold', fontSize: '1.25rem' }}>{c.front}</div>
-                    <div style={{ fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--color-text-muted)' }}>{c.back}</div>
-                    <button className="btn btn-danger" onClick={() => deleteCard(c._id)} style={{ marginTop: '0.5rem' }}>
+                  <div key={c._id} className="card" style={{ padding: '1.25rem' }}>
+                    <div style={{ fontWeight: 'bold', fontSize: '1.15rem', marginBottom: '0.5rem' }}>
+                      {c.front}
+                    </div>
+                    <div style={{
+                      fontWeight: 'bold',
+                      fontSize: '1.05rem',
+                      color: 'var(--color-primary)',
+                      paddingTop: '0.5rem',
+                      borderTop: '1px dashed var(--color-border)',
+                    }}>
+                      {c.back}
+                    </div>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => deleteCard(c._id)}
+                      style={{ marginTop: '0.75rem', fontSize: '0.8rem', padding: '0.3rem 0.7rem' }}
+                    >
                       Delete
                     </button>
                   </div>

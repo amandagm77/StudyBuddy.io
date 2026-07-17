@@ -13,15 +13,15 @@ function shuffleArray(array) {
 }
 
 export default function FlashcardStudy({ cards, onExit }) {
-  const [deck, setDeck] = useState(cards); // local, shufflable copy — doesn't mutate the original prop
+  const [deck, setDeck] = useState(cards);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
 
   const card = deck[index];
 
   function goNext() {
-    setFlipped(false); // always show the front first when landing on a new card
-    setIndex((i) => (i + 1) % deck.length); // wraps back to the first card after the last
+    setFlipped(false);
+    setIndex((i) => (i + 1) % deck.length);
   }
 
   function goPrev() {
@@ -44,26 +44,33 @@ export default function FlashcardStudy({ cards, onExit }) {
     );
   }
 
-  return (
-    <div>
-      <p style={{ textAlign: 'center' }}>Card {index + 1} of {deck.length}</p>
+return (
+    <div style={{ position: 'relative' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <p>Card {index + 1} of {deck.length}</p>
 
-      <div className="flip-card" onClick={() => setFlipped(!flipped)}>
-        <div className={`flip-card-inner ${flipped ? 'flipped' : ''}`}>
-          <div className="flip-card-front">{card.front}</div>
-          <div className="flip-card-back">{card.back}</div>
+        <div className="flip-card" onClick={() => setFlipped(!flipped)}>
+          <div className={`flip-card-inner ${flipped ? 'flipped' : ''}`}>
+            <div className="flip-card-front">{card.front}</div>
+            <div className="flip-card-back">{card.back}</div>
+          </div>
+        </div>
+        <p className="flip-card-hint">Click the card to flip it</p>
+
+        <div className="study-controls">
+          <button className="btn btn-secondary" onClick={goPrev}>&larr; Previous</button>
+          <button className="btn btn-primary" onClick={shuffle}>Shuffle</button>
+          <button className="btn btn-secondary" onClick={goNext}>Next &rarr;</button>
         </div>
       </div>
-      <p className="flip-card-hint">Click the card to flip it</p>
 
-      <div className="study-controls">
-        <button onClick={goPrev}>&larr; Previous</button>
-        <button onClick={shuffle}>Shuffle</button>
-        <button onClick={goNext}>Next &rarr;</button>
-      </div>
-      <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-        <button onClick={onExit}>Exit Study Mode</button>
-      </div>
+      <button
+        className="btn btn-danger"
+        onClick={onExit}
+        style={{ position: 'absolute', bottom: 0, right: 0 }}
+      >
+        Exit Study Mode
+      </button>
     </div>
   );
 }

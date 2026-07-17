@@ -6,8 +6,6 @@ import SubjectNav from '../components/SubjectNav';
 import NoteEditor from '../components/NoteEditor';
 import RewritePreview from '../components/RewritePreview';
 
-// Mimics a real US Letter page (8.5in x 11in) so the layout resembles an
-// actual physical allowed-notes sheet a student would print for an exam.
 const pageStyle = {
   width: '8.5in',
   maxWidth: '100%',
@@ -26,7 +24,7 @@ export default function CheatsheetEditor() {
   const [saving, setSaving] = useState(false);
   const [rewriteError, setRewriteError] = useState('');
   const [rewriteLoadingSide, setRewriteLoadingSide] = useState(null);
-  const [activeRewrite, setActiveRewrite] = useState(null); // { side, ...rewriteData }
+  const [activeRewrite, setActiveRewrite] = useState(null);
 
   useEffect(() => {
     load();
@@ -101,6 +99,13 @@ export default function CheatsheetEditor() {
           >
             {rewriteLoadingSide === 'front' ? 'Rewriting...' : 'Rewrite Front for Clarity'}
           </button>
+          {activeRewrite?.side === 'front' && (
+            <RewritePreview
+              rewrite={activeRewrite}
+              onApply={applyRewrite}
+              onDiscard={() => setActiveRewrite(null)}
+            />
+          )}
 
           <h4 style={{ marginTop: '2rem' }}>Side 2 (Back)</h4>
           <div style={pageStyle}>
@@ -117,15 +122,15 @@ export default function CheatsheetEditor() {
           >
             {rewriteLoadingSide === 'back' ? 'Rewriting...' : 'Rewrite Back for Clarity'}
           </button>
-
-          {rewriteError && <p className="error-text">{rewriteError}</p>}
-          {activeRewrite && (
+          {activeRewrite?.side === 'back' && (
             <RewritePreview
               rewrite={activeRewrite}
               onApply={applyRewrite}
               onDiscard={() => setActiveRewrite(null)}
             />
           )}
+
+          {rewriteError && <p className="error-text">{rewriteError}</p>}
         </div>
       </div>
     </div>

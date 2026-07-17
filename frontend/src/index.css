@@ -9,6 +9,7 @@
   --brand-dark: #244a57;
   --brand-green: #35c987;
   --brand-green-dark: #269c69; /* hover/active states need a darker step */
+  --brand-green-pale: #bdeeda; /* soft pastel tint of brand-green, for backgrounds like the navbar gradient */
 
   /* Semantic tokens — components should reference these, not brand-* directly.
      This indirection is what makes theme-switching possible later:
@@ -29,6 +30,8 @@
   --color-danger-hover: #b91c1c;
 
   --color-header-bg: var(--brand-dark);
+
+  --color-header-gradient-edge: var(--brand-green-pale);
 
   /* Layout tokens */
   --radius-sm: 6px;
@@ -59,6 +62,7 @@
 html, body {
   margin: 0;
   padding: 0;
+  scrollbar-gutter: stable;
 }
 
 body {

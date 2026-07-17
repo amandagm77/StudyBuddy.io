@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api/axios';
 import Navbar from '../components/Navbar';
@@ -10,11 +10,21 @@ export default function SubjectQuizzes() {
   const [subject, setSubject] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
   const [activeQuiz, setActiveQuiz] = useState(null);
+  const [activeMode, setActiveMode] = useState('take');
+
+  const quizRef = useRef(null); // used to auto-scroll to the active quiz
 
   useEffect(() => {
     api.get(`/subjects/${subjectId}`).then((res) => setSubject(res.data));
     api.get(`/quizzes?subject=${subjectId}`).then((res) => setQuizzes(res.data));
   }, [subjectId]);
+
+  // Auto-scroll down to the quiz whenever it's opened (either View Answers or Retake)
+  useEffect(() => {
+    if (activeQuiz && quizRef.current) {
+      quizRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [activeQuiz, activeMode]);
 
   if (!subject) return <div><Navbar /><div className="container"><p>Loading...</p></div></div>;
 
@@ -46,22 +56,34 @@ export default function SubjectQuizzes() {
               >
                 <span>
                   {q.questions.length} questions &middot;{' '}
-                  {new Date(q.createdAt).toLocaleDateString(undefined, {
+                  {new Date(q.createdAt).toLocaleString(undefined, {
                     month: 'short', day: 'numeric', year: 'numeric',
+                    hour: 'numeric', minute: '2-digit',
                   })}
                 </span>
-                <button className="btn btn-primary" onClick={() => setActiveQuiz(q)}>
-                  Take Quiz
-                </button>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => { setActiveQuiz(q); setActiveMode('review'); }}
+                  >
+                    View Answers
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => { setActiveQuiz(q); setActiveMode('take'); }}
+                  >
+                    Retake Quiz
+                  </button>
+                </div>
               </div>
             ))}
           </div>
 
-          {/* Re-mounting on quiz id ensures a fresh attempt each time,
-              rather than carrying over answers from a previous review */}
-          {activeQuiz && (
-            <Quiz key={activeQuiz._id} quiz={activeQuiz} onClose={() => setActiveQuiz(null)} />
-          )}
+          <div ref={quizRef}>
+            {activeQuiz && (
+              <Quiz key={`${activeQuiz._id}-${activeMode}`} quiz={activeQuiz} mode={activeMode} onClose={() => setActiveQuiz(null)} />
+            )}
+          </div>
         </div>
       </div>
     </div>
