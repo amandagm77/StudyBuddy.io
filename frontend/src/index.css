@@ -31,7 +31,9 @@
 
   --color-header-bg: var(--brand-dark);
 
-  --color-header-gradient-edge: var(--brand-green-pale);
+--color-header-gradient-center: #ffffff;
+--color-header-gradient-edge: var(--brand-green-pale);
+--color-header-text: var(--brand-dark);
 
   /* Layout tokens */
   --radius-sm: 6px;
@@ -45,7 +47,7 @@
   --font-body: 'Inter', system-ui, sans-serif;
 }
 
-/* Placeholder hook for future dark mode — Settings page will toggle this
+/* Placeholder hook for dark mode — Settings page will toggle this
    attribute on <html>, and every semantic token above gets redefined here. */
 [data-theme='dark'] {
   --color-bg: #0f172a;
@@ -53,6 +55,9 @@
   --color-border: #334155;
   --color-text: #f1f5f9;
   --color-text-muted: #94a3b8;
+  --color-header-gradient-center: #0f172a; /* dark navy center — logo's own white padding keeps it legible */
+  --color-header-gradient-edge: var(--brand-green-dark); /* keeps the mint identity, just deeper for contrast */
+  --color-header-text: #f1f5f9; /* light text so name/buttons stay visible against the dark center */
 }
 
 * {
@@ -194,4 +199,10 @@ a:hover {
 .muted {
   color: var(--color-text-muted);
   font-size: 0.9rem;
+}
+
+/* Quill's own CSS hardcodes placeholder text to a dark color — override it
+   so it respects our theme instead of staying dark in Dark Mode */
+.ql-editor.ql-blank::before {
+  color: var(--color-text-muted) !important;
 }

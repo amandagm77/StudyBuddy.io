@@ -77,4 +77,78 @@ router.get('/me', requireAuth, async (req, res) => {
   res.json(user);
 });
 
+// PUT /api/auth/name — update display name, no password required (not security-sensitive)
+router.put('/name', requireAuth, async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Name cannot be blank' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      { name: name.trim() },
+      { new: true }
+    ).select('-password');
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update name' });
+  }
+});
+
+// PUT /api/auth/email — update email, requires current password confirmation
+router.put('/email', requireAuth, async (req, res) => {
+  try {
+    const { currentPassword, newEmail } = req.body;
+    if (!currentPassword || !newEmail) {
+      return res.status(400).json({ error: 'Current password and new email are required' });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user || !(await user.comparePassword(currentPassword))) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    user.email = newEmail.toLowerCase().trim();
+    await user.save();
+
+    res.json({ id: user._id, email: user.email, name: user.name });
+  } catch (err) {
+    // Mongoose throws error code 11000 on a duplicate unique-index violation (email already taken)
+    if (err.code === 11000) {
+      return res.status(409).json({ error: 'An account with this email already exists' });
+    }
+    res.status(500).json({ error: 'Failed to update email' });
+  }
+});
+
+// PUT /api/auth/password — update password, requires current password confirmation
+router.put('/password', requireAuth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      return res.status(400).json({ error: 'All password fields are required' });
+    }
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ error: 'New password and repeat password do not match' });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user || !(await user.comparePassword(currentPassword))) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    user.password = newPassword; // pre-save hook in User.js re-hashes this automatically
+    await user.save();
+
+    res.json({ message: 'Password updated' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update password' });
+  }
+});
+
 module.exports = router;

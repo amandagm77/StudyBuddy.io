@@ -45,7 +45,7 @@ export default function FlashcardStudy({ cards, onExit }) {
   }
 
 return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ width: '100%' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <p>Card {index + 1} of {deck.length}</p>
 
@@ -64,13 +64,9 @@ return (
         </div>
       </div>
 
-      <button
-        className="btn btn-danger"
-        onClick={onExit}
-        style={{ position: 'absolute', bottom: 0, right: 0 }}
-      >
-        Exit Study Mode
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
+        <button className="btn btn-danger" onClick={onExit}>Exit Study Mode</button>
+      </div>
     </div>
   );
 }

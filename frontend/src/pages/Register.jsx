@@ -5,19 +5,24 @@ import AuthLayout from '../components/AuthLayout';
 
 export default function Register() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
-    e.preventDefault();
-    setError('');
-    try {
-      await register(form.email, form.password, form.name);
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed');
-    }
+  e.preventDefault();
+  setError('');
+  if (form.password !== confirmPassword) {
+    setError('Passwords do not match.');
+    return;
+  }
+  try {
+    await register(form.email, form.password, form.name);
+    navigate('/dashboard');
+  } catch (err) {
+    setError(err.response?.data?.error || 'Registration failed');
+  }
   }
 
   return (
@@ -57,6 +62,16 @@ export default function Register() {
             required
             minLength={8}
           />
+          <div className="form-group">
+          <label className="label">Repeat Password</label>
+          <input
+            className="input"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+          </div>
           <span className="muted">Minimum 8 characters</span>
         </div>
 

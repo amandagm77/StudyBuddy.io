@@ -8,7 +8,7 @@ export default function Navbar() {
     <header
       style={{
         position: 'relative',
-        background: 'radial-gradient(ellipse 700px 160% at center, #ffffff 0%, var(--color-header-gradient-edge) 100%)',
+        background: 'radial-gradient(ellipse 700px 160% at center, var(--color-header-gradient-center) 0%, var(--color-header-gradient-edge) 100%)',
         padding: '1rem 1.5rem',
         display: 'grid',
         gridTemplateColumns: '1fr auto 1fr',
@@ -23,13 +23,16 @@ export default function Navbar() {
       </Link>
 
       <div style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <span style={{ color: 'var(--brand-dark)', fontWeight: 600, fontSize: '0.9rem' }}>
+        <span style={{ color: 'var(--color-header-text)', fontWeight: 600, fontSize: '0.9rem' }}>
           {user?.name}
         </span>
+        <Link className="btn btn-secondary" to="/settings" style={{ color: 'var(--color-header-text)', borderColor: 'var(--color-header-text)' }}>
+          Settings
+        </Link>
         <button
           className="btn btn-secondary"
           onClick={logout}
-          style={{ color: 'var(--brand-dark)', borderColor: 'var(--brand-dark)' }}
+          style={{ color: 'var(--color-header-text)', borderColor: 'var(--color-header-text)' }}
         >
           Logout
         </button>

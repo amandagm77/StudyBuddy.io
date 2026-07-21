@@ -13,7 +13,7 @@ const pageStyle = {
   margin: '1rem auto',
   padding: '0.5in',
   border: '1px solid var(--color-border)',
-  background: 'white',
+  background: 'var(--color-surface)',
   boxShadow: 'var(--shadow-md)',
 };
 
