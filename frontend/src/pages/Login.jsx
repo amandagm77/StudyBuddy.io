@@ -55,6 +55,9 @@ export default function Login() {
         <p className="muted" style={{ textAlign: 'center', marginTop: '1.25rem' }}>
           No account? <Link to="/register">Register</Link>
         </p>
+        <p className="muted" style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+          <Link to="/forgot-password">Forgot Password?</Link>
+        </p>
       </form>
     </AuthLayout>
   );

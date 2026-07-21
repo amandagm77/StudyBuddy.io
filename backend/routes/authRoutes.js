@@ -1,7 +1,11 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const requireAuth = require('../middleware/auth');
+const crypto = require('crypto');
+const PasswordResetCode = require('../models/PasswordResetCode');
+const { sendResetCodeEmail } = require('../utils/mailer');
 
 const router = express.Router();
 
@@ -149,6 +153,125 @@ router.put('/password', requireAuth, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Failed to update password' });
   }
+});
+
+// POST /api/auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
+  const user = await User.findOne({ email: email.toLowerCase() });
+
+  // Always respond the same way whether or not the account exists —
+  // this prevents attackers from using this endpoint to discover which
+  // emails have accounts on the site (a real security consideration)
+  const genericResponse = {
+    message: 'If an account with that email exists, a reset code has been sent.',
+  };
+
+  if (!user) {
+    return res.json(genericResponse);
+  }
+
+  // Generate a random 6-digit code
+  const code = crypto.randomInt(100000, 999999).toString();
+  const codeHash = await bcrypt.hash(code, 10);
+
+  // Only one active code per user at a time
+  await PasswordResetCode.deleteMany({ user: user._id });
+  await PasswordResetCode.create({
+    user: user._id,
+    codeHash,
+    expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
+  });
+
+  try {
+    await sendResetCodeEmail(user.email, code);
+  } catch (err) {
+    console.error('Failed to send reset email:', err);
+    return res.status(500).json({ error: 'Failed to send reset email. Please try again.' });
+  }
+
+  res.json(genericResponse);
+});
+
+// POST /api/auth/verify-reset-code
+router.post('/verify-reset-code', async (req, res) => {
+  const { email, code } = req.body;
+  if (!email || !code) {
+    return res.status(400).json({ error: 'Email and code are required' });
+  }
+
+  const user = await User.findOne({ email: email.toLowerCase() });
+  if (!user) {
+    return res.status(400).json({ error: 'Invalid or expired code' });
+  }
+
+  const resetRecord = await PasswordResetCode.findOne({ user: user._id });
+  if (!resetRecord || resetRecord.expiresAt < new Date()) {
+    return res.status(400).json({ error: 'Invalid or expired code. Please request a new one.' });
+  }
+
+  if (resetRecord.attempts >= 5) {
+    return res.status(429).json({ error: 'Too many incorrect attempts. Please request a new code.' });
+  }
+
+  const isMatch = await bcrypt.compare(code, resetRecord.codeHash);
+  if (!isMatch) {
+    resetRecord.attempts += 1;
+    await resetRecord.save();
+    return res.status(400).json({ error: 'Incorrect code. Please try again.' });
+  }
+
+  // Code is correct — issue a short-lived, single-purpose token so the
+  // final reset-password step doesn't need the code re-entered, but also
+  // can't be used for anything except resetting THIS user's password
+  const resetToken = jwt.sign(
+    { userId: user._id, purpose: 'password-reset' },
+    process.env.JWT_SECRET,
+    { expiresIn: '10m' }
+  );
+
+  await PasswordResetCode.deleteOne({ _id: resetRecord._id }); // single-use
+
+  res.json({ resetToken });
+});
+
+// POST /api/auth/reset-password
+router.post('/reset-password', async (req, res) => {
+  const { resetToken, newPassword, confirmPassword } = req.body;
+  if (!resetToken || !newPassword || !confirmPassword) {
+    return res.status(400).json({ error: 'All fields are required' });
+  }
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ error: 'Passwords do not match' });
+  }
+  if (newPassword.length < 8) {
+    return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  }
+
+  let payload;
+  try {
+    payload = jwt.verify(resetToken, process.env.JWT_SECRET);
+  } catch (err) {
+    return res.status(401).json({ error: 'Reset session expired. Please start over.' });
+  }
+
+  if (payload.purpose !== 'password-reset') {
+    return res.status(401).json({ error: 'Invalid reset session.' });
+  }
+
+  const user = await User.findById(payload.userId);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  user.password = newPassword; // pre-save hook rehashes automatically
+  await user.save();
+
+  res.json({ message: 'Password reset successful' });
 });
 
 module.exports = router;
