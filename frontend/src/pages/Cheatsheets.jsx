@@ -26,42 +26,42 @@ export default function Cheatsheets() {
   }
 
   async function createSheet(e) {
-  e.preventDefault();
-  setError('');
-  if (!newTitle.trim()) {
-    setError("Cheat sheet title can't be blank.");
-    return;
-  }
+    e.preventDefault();
+    setError('');
+    if (!newTitle.trim()) {
+      setError("Cheat sheet title can't be blank.");
+      return;
+    }
 
-  try {
-    await api.post('/cheatsheets', { title: newTitle, subject: subjectId });
-    setNewTitle('');
-    loadSheets();
-  } catch (err) {
-    setError(err.response?.data?.error || 'Failed to create cheatsheet');
-  }
+    try {
+      await api.post('/cheatsheets', { title: newTitle, subject: subjectId });
+      setNewTitle('');
+      loadSheets();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to create cheatsheet');
+    }
   }
 
   function deleteAllSheets() {
-  setConfirmModal({
-    message: `Are you sure? This will permanently delete all ${sheets.length} cheatsheets in this subject.`,
-    onConfirm: async () => {
-      await api.delete(`/cheatsheets?subject=${subjectId}`);
-      setConfirmModal(null);
-      loadSheets();
-    },
-  });
+    setConfirmModal({
+      message: `Are you sure? This will permanently delete all ${sheets.length} cheatsheets in this subject.`,
+      onConfirm: async () => {
+        await api.delete(`/cheatsheets?subject=${subjectId}`);
+        setConfirmModal(null);
+        loadSheets();
+      },
+    });
   }
 
   function deleteSheet(id) {
-  setConfirmModal({
-    message: 'Delete this cheatsheet?',
-    onConfirm: async () => {
-      await api.delete(`/cheatsheets/${id}`);
-      setConfirmModal(null);
-      loadSheets();
-    },
-  });
+    setConfirmModal({
+      message: 'Delete this cheatsheet?',
+      onConfirm: async () => {
+        await api.delete(`/cheatsheets/${id}`);
+        setConfirmModal(null);
+        loadSheets();
+      },
+    });
   }
 
   if (!subject) return <div><Navbar /><div className="container"><p>Loading...</p></div></div>;
@@ -77,7 +77,11 @@ export default function Cheatsheets() {
 
           {sheets.length < MAX_SHEETS && (
             <form onSubmit={createSheet} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              <label className="label" htmlFor="new-cheatsheet-title" style={{ display: 'none' }}>
+                Cheat sheet title
+              </label>
               <input
+                id="new-cheatsheet-title"
                 className="input"
                 placeholder="e.g. Midterm 1, Final Exam"
                 value={newTitle}
@@ -97,7 +101,7 @@ export default function Cheatsheets() {
             disabled={sheets.length === 0}
             style={{ marginBottom: '1rem' }}
           >
-          Delete All
+            Delete All
           </button>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -138,7 +142,7 @@ export default function Cheatsheets() {
           onConfirm={confirmModal.onConfirm}
           onCancel={() => setConfirmModal(null)}
         />
-        )}
+      )}
     </div>
   );
 }

@@ -85,8 +85,8 @@ export default function Settings() {
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <h3>Appearance</h3>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span className="muted">Dark Mode</span>
-            <button className="btn btn-secondary" onClick={toggleTheme}>
+            <span className="muted" id="dark-mode-label">Dark Mode</span>
+            <button className="btn btn-secondary" onClick={toggleTheme} aria-labelledby="dark-mode-label">
               {theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             </button>
           </div>
@@ -97,7 +97,8 @@ export default function Settings() {
           <h3>Name</h3>
           <form onSubmit={handleNameSubmit}>
             <div className="form-group">
-              <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
+              <label className="label" htmlFor="settings-name">Name</label>
+              <input id="settings-name" className="input" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             {nameStatus.error && <p className="error-text">{nameStatus.error}</p>}
             {nameStatus.success && <p style={{ color: 'var(--color-primary)' }}>{nameStatus.success}</p>}
@@ -111,8 +112,9 @@ export default function Settings() {
           <p className="muted" style={{ marginTop: 0 }}>Current: {user?.email}</p>
           <form onSubmit={handleEmailSubmit}>
             <div className="form-group">
-              <label className="label">Current Password</label>
+              <label className="label" htmlFor="settings-email-current-password">Current Password</label>
               <input
+                id="settings-email-current-password"
                 className="input"
                 type="password"
                 value={emailForm.currentPassword}
@@ -120,8 +122,9 @@ export default function Settings() {
               />
             </div>
             <div className="form-group">
-              <label className="label">New Email</label>
+              <label className="label" htmlFor="settings-new-email">New Email</label>
               <input
+                id="settings-new-email"
                 className="input"
                 type="email"
                 value={emailForm.newEmail}
@@ -139,8 +142,9 @@ export default function Settings() {
           <h3>Password</h3>
           <form onSubmit={handlePasswordSubmit}>
             <div className="form-group">
-              <label className="label">Current Password</label>
+              <label className="label" htmlFor="settings-password-current">Current Password</label>
               <input
+                id="settings-password-current"
                 className="input"
                 type="password"
                 value={passwordForm.currentPassword}
@@ -148,8 +152,9 @@ export default function Settings() {
               />
             </div>
             <div className="form-group">
-              <label className="label">New Password</label>
+              <label className="label" htmlFor="settings-password-new">New Password</label>
               <input
+                id="settings-password-new"
                 className="input"
                 type="password"
                 value={passwordForm.newPassword}
@@ -157,8 +162,9 @@ export default function Settings() {
               />
             </div>
             <div className="form-group">
-              <label className="label">Repeat New Password</label>
+              <label className="label" htmlFor="settings-password-confirm">Repeat New Password</label>
               <input
+                id="settings-password-confirm"
                 className="input"
                 type="password"
                 value={passwordForm.confirmPassword}

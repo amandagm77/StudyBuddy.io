@@ -26,8 +26,9 @@ export default function Login() {
         {error && <p className="error-text">{error}</p>}
 
         <div className="form-group">
-          <label className="label">Email</label>
+          <label className="label" htmlFor="login-email">Email</label>
           <input
+            id="login-email"
             className="input"
             type="email"
             value={form.email}

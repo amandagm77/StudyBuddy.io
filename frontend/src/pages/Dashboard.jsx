@@ -57,6 +57,10 @@ export default function Dashboard() {
     });
   }
 
+  function goToSubject(subjectId) {
+    navigate(`/subjects/${subjectId}/notes`);
+  }
+
   return (
     <div>
       <Navbar />
@@ -68,7 +72,11 @@ export default function Dashboard() {
 
         <div style={{ margin: '0 auto 2rem', maxWidth: '480px' }}>
           <form onSubmit={createSubject} style={{ display: 'flex', gap: '0.75rem' }}>
+            <label className="label" htmlFor="dashboard-new-subject" style={{ display: 'none' }}>
+              New subject title
+            </label>
             <input
+              id="dashboard-new-subject"
               className="input"
               placeholder="Enter Subject title here"
               value={newSubjectTitle}
@@ -103,7 +111,16 @@ export default function Dashboard() {
             <div
               key={s._id}
               className="card"
-              onClick={() => navigate(`/subjects/${s._id}/notes`)}
+              onClick={() => goToSubject(s._id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  goToSubject(s._id);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Open ${s.title}`}
               style={{ cursor: 'pointer', position: 'relative', textAlign: 'left' }}
             >
               <h3 style={{ marginTop: '2.25rem', marginBottom: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }}>{s.title}</h3>

@@ -16,7 +16,7 @@
      a dark theme or accent swap only needs to redefine these. */
   --color-primary: var(--brand-green);
   --color-primary-hover: var(--brand-green-dark);
-  --color-primary-contrast: #ffffff; /* text color placed on top of primary */
+  --color-primary-contrast: var(--brand-dark); /* dark navy text on mint green ≈ 4.5:1 contrast, meets WCAG AA */
 
   --color-bg: #f8fafc;
   --color-surface: #ffffff; /* cards, panels, modals */

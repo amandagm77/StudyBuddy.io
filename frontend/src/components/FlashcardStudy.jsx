@@ -49,7 +49,20 @@ return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <p>Card {index + 1} of {deck.length}</p>
 
-        <div className="flip-card" onClick={() => setFlipped(!flipped)}>
+        <div
+          className="flip-card"
+          onClick={() => setFlipped(!flipped)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setFlipped(!flipped);
+            }
+          }}
+          role="button"
+          tabIndex={0}
+          aria-pressed={flipped}
+          aria-label={flipped ? 'Showing answer, press to flip back' : 'Showing question, press to flip'}
+        >
           <div className={`flip-card-inner ${flipped ? 'flipped' : ''}`}>
             <div className="flip-card-front">{card.front}</div>
             <div className="flip-card-back">{card.back}</div>

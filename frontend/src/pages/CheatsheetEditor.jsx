@@ -85,8 +85,8 @@ export default function CheatsheetEditor() {
             </button>
           </div>
 
-          <h4 style={{ marginTop: '1.5rem' }}>Side 1 (Front)</h4>
-          <div style={pageStyle}>
+          <h4 id="cheatsheet-front-heading" style={{ marginTop: '1.5rem' }}>Side 1 (Front)</h4>
+          <div style={pageStyle} role="group" aria-labelledby="cheatsheet-front-heading">
             <NoteEditor
               value={sheet.frontContent}
               onChange={(html) => setSheet({ ...sheet, frontContent: html })}
@@ -98,7 +98,7 @@ export default function CheatsheetEditor() {
             onClick={() => generateRewrite('front')}
             disabled={rewriteLoadingSide === 'front'}
           >
-            <Sparkles size={16} className="ai-icon" />
+            <Sparkles size={16} className="ai-icon" aria-hidden="true" />
             {rewriteLoadingSide === 'front' ? 'Rewriting...' : 'Rewrite Front for Clarity'}
           </button>
           {activeRewrite?.side === 'front' && (
@@ -109,8 +109,8 @@ export default function CheatsheetEditor() {
             />
           )}
 
-          <h4 style={{ marginTop: '2rem' }}>Side 2 (Back)</h4>
-          <div style={pageStyle}>
+          <h4 id="cheatsheet-back-heading" style={{ marginTop: '2rem' }}>Side 2 (Back)</h4>
+          <div style={pageStyle} role="group" aria-labelledby="cheatsheet-back-heading">
             <NoteEditor
               value={sheet.backContent}
               onChange={(html) => setSheet({ ...sheet, backContent: html })}
@@ -122,7 +122,7 @@ export default function CheatsheetEditor() {
             onClick={() => generateRewrite('back')}
             disabled={rewriteLoadingSide === 'back'}
           >
-            <Sparkles size={16} className="ai-icon" />
+            <Sparkles size={16} className="ai-icon" aria-hidden="true" />
             {rewriteLoadingSide === 'back' ? 'Rewriting...' : 'Rewrite Back for Clarity'}
           </button>
           {activeRewrite?.side === 'back' && (

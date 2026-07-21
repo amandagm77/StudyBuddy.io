@@ -29,46 +29,46 @@ export default function Flashcards() {
   }
 
   async function createCard(e) {
-  e.preventDefault();
-  setError('');
-  if (!form.front.trim()) {
-    setError("Front side can't be blank.");
-    return;
-  }
-  if (!form.back.trim()) {
-    setError("Back side can't be blank.");
-    return;
-  }
+    e.preventDefault();
+    setError('');
+    if (!form.front.trim()) {
+      setError("Front side can't be blank.");
+      return;
+    }
+    if (!form.back.trim()) {
+      setError("Back side can't be blank.");
+      return;
+    }
 
-  try {
-    await api.post('/flashcards', { ...form, subject: subjectId });
-    setForm({ front: '', back: '' });
-    loadCards();
-  } catch (err) {
-    setError(err.response?.data?.error || 'Failed to create flashcard');
-  }
+    try {
+      await api.post('/flashcards', { ...form, subject: subjectId });
+      setForm({ front: '', back: '' });
+      loadCards();
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to create flashcard');
+    }
   }
 
   function deleteAllCards() {
-  setConfirmModal({
-    message: `Are you sure? This will permanently delete all ${cards.length} flashcards in this subject.`,
-    onConfirm: async () => {
-      await api.delete(`/flashcards?subject=${subjectId}`);
-      setConfirmModal(null);
-      loadCards();
-    },
-  });
+    setConfirmModal({
+      message: `Are you sure? This will permanently delete all ${cards.length} flashcards in this subject.`,
+      onConfirm: async () => {
+        await api.delete(`/flashcards?subject=${subjectId}`);
+        setConfirmModal(null);
+        loadCards();
+      },
+    });
   }
 
   function deleteCard(id) {
-  setConfirmModal({
-    message: 'Delete this flashcard?',
-    onConfirm: async () => {
-      await api.delete(`/flashcards/${id}`);
-      setConfirmModal(null);
-      loadCards();
-    },
-  });
+    setConfirmModal({
+      message: 'Delete this flashcard?',
+      onConfirm: async () => {
+        await api.delete(`/flashcards/${id}`);
+        setConfirmModal(null);
+        loadCards();
+      },
+    });
   }
 
   if (!subject) return <div><Navbar /><div className="container"><p>Loading...</p></div></div>;
@@ -106,24 +106,28 @@ export default function Flashcards() {
               {cards.length < MAX_CARDS && (
                 <form onSubmit={createCard} style={{ marginBottom: '1.5rem' }}>
                   <div className="form-group">
+                    <label className="label" htmlFor="flashcard-front">Front (question)</label>
                     <input
+                      id="flashcard-front"
                       className="input"
                       placeholder="Front (question)"
                       value={form.front}
                       maxLength={MAX_CHARS}
                       onChange={(e) => setForm({ ...form, front: e.target.value })}
                     />
-                    <span className="muted">{form.front.length}/{MAX_CHARS}</span>
+                    <span className="muted" aria-live="polite">{form.front.length}/{MAX_CHARS}</span>
                   </div>
                   <div className="form-group">
+                    <label className="label" htmlFor="flashcard-back">Back (answer)</label>
                     <input
+                      id="flashcard-back"
                       className="input"
                       placeholder="Back (answer)"
                       value={form.back}
                       maxLength={MAX_CHARS}
                       onChange={(e) => setForm({ ...form, back: e.target.value })}
                     />
-                    <span className="muted">{form.back.length}/{MAX_CHARS}</span>
+                    <span className="muted" aria-live="polite">{form.back.length}/{MAX_CHARS}</span>
                   </div>
                   <button className="btn btn-primary" type="submit">Add Flashcard</button>
                 </form>
@@ -171,7 +175,7 @@ export default function Flashcards() {
           onConfirm={confirmModal.onConfirm}
           onCancel={() => setConfirmModal(null)}
         />
-        )}
+      )}
     </div>
   );
 }

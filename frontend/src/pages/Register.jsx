@@ -11,18 +11,18 @@ export default function Register() {
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
-  e.preventDefault();
-  setError('');
-  if (form.password !== confirmPassword) {
-    setError('Passwords do not match.');
-    return;
-  }
-  try {
-    await register(form.email, form.password, form.name);
-    navigate('/dashboard');
-  } catch (err) {
-    setError(err.response?.data?.error || 'Registration failed');
-  }
+    e.preventDefault();
+    setError('');
+    if (form.password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+    try {
+      await register(form.email, form.password, form.name);
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Registration failed');
+    }
   }
 
   return (
@@ -32,8 +32,9 @@ export default function Register() {
         {error && <p className="error-text">{error}</p>}
 
         <div className="form-group">
-          <label className="label">Name</label>
+          <label className="label" htmlFor="register-name">Name</label>
           <input
+            id="register-name"
             className="input"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -42,8 +43,9 @@ export default function Register() {
         </div>
 
         <div className="form-group">
-          <label className="label">Email</label>
+          <label className="label" htmlFor="register-email">Email</label>
           <input
+            id="register-email"
             className="input"
             type="email"
             value={form.email}
@@ -53,8 +55,9 @@ export default function Register() {
         </div>
 
         <div className="form-group">
-          <label className="label">Password</label>
+          <label className="label" htmlFor="register-password">Password</label>
           <input
+            id="register-password"
             className="input"
             type="password"
             value={form.password}
@@ -62,17 +65,19 @@ export default function Register() {
             required
             minLength={8}
           />
-          <div className="form-group">
-          <label className="label">Repeat Password</label>
+          <span className="muted">Minimum 8 characters</span>
+        </div>
+
+        <div className="form-group">
+          <label className="label" htmlFor="register-confirm-password">Repeat Password</label>
           <input
+            id="register-confirm-password"
             className="input"
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
-          </div>
-          <span className="muted">Minimum 8 characters</span>
         </div>
 
         <button className="btn btn-primary" type="submit" style={{ width: '100%', marginTop: '0.5rem' }}>

@@ -62,15 +62,21 @@ export default function Quiz({ quiz, onClose, mode = 'take' }) {
       {quiz.questions.map((q, qIndex) => (
         <div key={qIndex} style={{ marginBottom: '1.75rem' }}>
           <p style={{ fontWeight: 600 }}>{qIndex + 1}. {q.question}</p>
-          {q.options.map((option, oIndex) => (
-            <button
-              key={oIndex}
-              onClick={() => selectAnswer(qIndex, oIndex)}
-              style={getOptionStyle(qIndex, oIndex, q.correctIndex)}
-            >
-              {option}
-            </button>
-          ))}
+          {q.options.map((option, oIndex) => {
+            const isCorrect = oIndex === q.correctIndex;
+            const isSelected = answers[qIndex] === oIndex;
+            return (
+              <button
+                key={oIndex}
+                onClick={() => selectAnswer(qIndex, oIndex)}
+                style={getOptionStyle(qIndex, oIndex, q.correctIndex)}
+              >
+                {option}
+                {submitted && isCorrect && ' ✓'}
+                {submitted && isSelected && !isCorrect && ' ✗'}
+              </button>
+            );
+          })}
           {submitted && <p className="muted" style={{ fontStyle: 'italic' }}>{q.explanation}</p>}
         </div>
       ))}

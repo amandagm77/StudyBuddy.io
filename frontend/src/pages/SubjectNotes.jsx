@@ -154,7 +154,7 @@ export default function SubjectNotes() {
           {/* Quiz generation + bulk actions toolbar, now at the top */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem' }}>
             <button className="btn btn-primary" onClick={generateQuiz} disabled={quizLoading}>
-              <Sparkles size={16} className="ai-icon" />
+              <Sparkles size={16} className="ai-icon" aria-hidden="true" />
               {quizLoading ? 'Generating quiz...' : 'Generate Quiz from Selected Notes'}
             </button>
             <button className="btn btn-secondary" onClick={toggleSelectAll} disabled={notes.length === 0}>
@@ -218,7 +218,7 @@ export default function SubjectNotes() {
                     onClick={() => generateRewrite(n._id)}
                     disabled={rewriteLoadingId === n._id}
                   >
-                    <Sparkles size={16} className="ai-icon" />
+                    <Sparkles size={16} className="ai-icon" aria-hidden="true" />
                     {rewriteLoadingId === n._id ? 'Rewriting...' : 'Rewrite for Clarity'}
                   </button>
                   <button className="btn btn-danger" onClick={() => deleteNote(n._id)}>Delete</button>
