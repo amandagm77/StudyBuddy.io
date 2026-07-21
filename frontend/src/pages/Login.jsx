@@ -22,7 +22,6 @@ export default function Login() {
 
   return (
     <AuthLayout>
-      <h2 style={{ marginBottom: '1.5rem' }}>Welcome back</h2>
       <form onSubmit={handleSubmit}>
         {error && <p className="error-text">{error}</p>}
 

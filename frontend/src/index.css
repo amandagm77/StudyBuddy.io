@@ -206,3 +206,38 @@ a:hover {
 .ql-editor.ql-blank::before {
   color: var(--color-text-muted) !important;
 }
+
+.ai-icon {
+  color: currentColor;
+  transition: color 0.2s ease;
+  vertical-align: -2px;
+  margin-right: 0.4rem;
+}
+
+.btn:hover .ai-icon {
+  color: #ffd75e; /* warm gold shimmer on hover, distinct from the button's own text color */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 2s ease forwards;
+}
+
+.fade-in-up {
+  animation: fadeInUp 2s ease forwards;
+}

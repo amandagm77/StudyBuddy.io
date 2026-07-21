@@ -28,6 +28,9 @@ router.post('/', async (req, res) => {
   if (!title || !subject) {
     return res.status(400).json({ error: 'title and subject are required' });
   }
+  if (title.length > 30) {
+    return res.status(400).json({ error: 'Title must be 30 characters or fewer' });
+  }
 
   const count = await Cheatsheet.countDocuments({ subject, owner: req.userId });
   if (count >= MAX_PER_SUBJECT) {

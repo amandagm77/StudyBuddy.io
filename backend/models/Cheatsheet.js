@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const cheatsheetSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true, trim: true },
+    title: { type: String, required: true, trim: true, maxlength: 30 },
     subject: { type: mongoose.Schema.Types.ObjectId, ref: 'Subject', required: true },
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     frontContent: { type: String, default: '' }, // Quill HTML — side 1

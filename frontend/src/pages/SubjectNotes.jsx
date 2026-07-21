@@ -7,6 +7,7 @@ import Quiz from '../components/Quiz';
 import RewritePreview from '../components/RewritePreview';
 import NoteEditor from '../components/NoteEditor';
 import ConfirmModal from '../components/ConfirmModal';
+import { Sparkles } from 'lucide-react';
 
 export default function SubjectNotes() {
   const { subjectId } = useParams();
@@ -153,6 +154,7 @@ export default function SubjectNotes() {
           {/* Quiz generation + bulk actions toolbar, now at the top */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem' }}>
             <button className="btn btn-primary" onClick={generateQuiz} disabled={quizLoading}>
+              <Sparkles size={16} className="ai-icon" />
               {quizLoading ? 'Generating quiz...' : 'Generate Quiz from Selected Notes'}
             </button>
             <button className="btn btn-secondary" onClick={toggleSelectAll} disabled={notes.length === 0}>
@@ -172,6 +174,7 @@ export default function SubjectNotes() {
                 className="input"
                 placeholder="Enter Note title here"
                 value={newNote.title}
+                maxLength={30}
                 onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
               />
             </div>
@@ -199,8 +202,10 @@ export default function SubjectNotes() {
                     onChange={() => toggleNoteSelection(n._id)}
                     style={{ marginTop: '0.35rem' }}
                   />
-                  <div style={{ flex: 1 }}>
-                    <strong>{n.title}</strong>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <strong style={{ display: 'inline-block', maxWidth: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
+                      {n.title}
+                    </strong>
                     <div
                       style={{ overflowWrap: 'break-word', color: 'var(--color-text-muted)' }}
                       dangerouslySetInnerHTML={{ __html: n.body }}
@@ -213,6 +218,7 @@ export default function SubjectNotes() {
                     onClick={() => generateRewrite(n._id)}
                     disabled={rewriteLoadingId === n._id}
                   >
+                    <Sparkles size={16} className="ai-icon" />
                     {rewriteLoadingId === n._id ? 'Rewriting...' : 'Rewrite for Clarity'}
                   </button>
                   <button className="btn btn-danger" onClick={() => deleteNote(n._id)}>Delete</button>

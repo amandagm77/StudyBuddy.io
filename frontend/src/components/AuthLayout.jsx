@@ -29,7 +29,10 @@ export default function AuthLayout({ children }) {
 
       <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '400px', padding: '1.5rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img src="/logos/logo-stacked.png" alt="StudyBuddy.io" style={{ width: '220px' }} />
+          <img src="/logos/logo-stacked.png" alt="StudyBuddy.io" className="fade-in" style={{ width: '220px' }} />
+            <p className="muted" style={{ marginTop: '0.75rem', fontSize: '1rem' }}>
+              An app for students to organize notes and study smarter for any test.
+            </p>
         </div>
         <div className="card">{children}</div>
       </div>

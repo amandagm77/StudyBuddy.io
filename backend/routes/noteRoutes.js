@@ -20,6 +20,9 @@ router.post('/', async (req, res) => {
   if (!title || !body || !subject) {
     return res.status(400).json({ error: 'Title, body, and subject are required' });
   }
+  if (title.length > 30) {
+    return res.status(400).json({ error: 'Title must be 30 characters or fewer' });
+  }
   const note = await Note.create({ title, body, subject, owner: req.userId });
   res.status(201).json(note);
 });

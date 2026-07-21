@@ -81,6 +81,7 @@ export default function Cheatsheets() {
                 className="input"
                 placeholder="e.g. Midterm 1, Final Exam"
                 value={newTitle}
+                maxLength={30}
                 onChange={(e) => setNewTitle(e.target.value)}
               />
               <button className="btn btn-primary" type="submit" style={{ whiteSpace: 'nowrap' }}>
@@ -110,10 +111,22 @@ export default function Cheatsheets() {
                   padding: '0.75rem 1rem',
                   border: '1px solid var(--color-border)',
                   borderRadius: 'var(--radius-sm)',
+                  gap: '0.75rem',
                 }}
               >
-                <Link to={`/cheatsheets/${s._id}/edit`} style={{ fontWeight: 600 }}>{s.title}</Link>
-                <button className="btn btn-danger" onClick={() => deleteSheet(s._id)}>Delete</button>
+                <Link
+                  to={`/cheatsheets/${s._id}/edit`}
+                  style={{ fontWeight: 600, minWidth: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }}
+                >
+                  {s.title}
+                </Link>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => deleteSheet(s._id)}
+                  style={{ flexShrink: 0 }}
+                >
+                  Delete
+                </button>
               </div>
             ))}
           </div>

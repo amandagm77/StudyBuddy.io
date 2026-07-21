@@ -20,6 +20,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   const { title } = req.body;
   if (!title) return res.status(400).json({ error: 'Title is required' });
+  if (title.length > 30) return res.status(400).json({ error: 'Title must be 30 characters or fewer' });
 
   const subject = await Subject.create({ title, owner: req.userId });
   res.status(201).json(subject);

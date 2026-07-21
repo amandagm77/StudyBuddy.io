@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import SubjectNav from '../components/SubjectNav';
 import NoteEditor from '../components/NoteEditor';
 import RewritePreview from '../components/RewritePreview';
+import { Sparkles } from 'lucide-react';
 
 const pageStyle = {
   width: '8.5in',
@@ -78,7 +79,7 @@ export default function CheatsheetEditor() {
 
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ marginBottom: 0 }}>{sheet.title}</h3>
+            <h3 style={{ marginBottom: 0, minWidth: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }}>{sheet.title}</h3>
             <button className="btn btn-primary" onClick={save} disabled={saving}>
               {saving ? 'Saving...' : 'Save'}
             </button>
@@ -97,6 +98,7 @@ export default function CheatsheetEditor() {
             onClick={() => generateRewrite('front')}
             disabled={rewriteLoadingSide === 'front'}
           >
+            <Sparkles size={16} className="ai-icon" />
             {rewriteLoadingSide === 'front' ? 'Rewriting...' : 'Rewrite Front for Clarity'}
           </button>
           {activeRewrite?.side === 'front' && (
@@ -120,6 +122,7 @@ export default function CheatsheetEditor() {
             onClick={() => generateRewrite('back')}
             disabled={rewriteLoadingSide === 'back'}
           >
+            <Sparkles size={16} className="ai-icon" />
             {rewriteLoadingSide === 'back' ? 'Rewriting...' : 'Rewrite Back for Clarity'}
           </button>
           {activeRewrite?.side === 'back' && (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
@@ -23,55 +23,56 @@ export default function Dashboard() {
   }
 
   async function createSubject(e) {
-  e.preventDefault();
-  if (!newSubjectTitle.trim()) {
-    setSubjectError("Subject title can't be blank.");
-    return;
-  }
-  setSubjectError('');
-  await api.post('/subjects', { title: newSubjectTitle });
-  setNewSubjectTitle('');
-  loadSubjects();
+    e.preventDefault();
+    if (!newSubjectTitle.trim()) {
+      setSubjectError("Subject title can't be blank.");
+      return;
+    }
+    setSubjectError('');
+    await api.post('/subjects', { title: newSubjectTitle });
+    setNewSubjectTitle('');
+    loadSubjects();
   }
 
   function deleteAllSubjects() {
-  setConfirmModal({
-    message: `Are you sure? This will permanently delete all ${subjects.length} subjects and everything inside them (notes, quizzes, flashcards, cheatsheets). This cannot be undone.`,
-    onConfirm: async () => {
-      await api.delete('/subjects');
-      setConfirmModal(null);
-      loadSubjects();
-    },
-  });
+    setConfirmModal({
+      message: `Are you sure? This will permanently delete all ${subjects.length} subjects and everything inside them (notes, quizzes, flashcards, cheatsheets). This cannot be undone.`,
+      onConfirm: async () => {
+        await api.delete('/subjects');
+        setConfirmModal(null);
+        loadSubjects();
+      },
+    });
   }
 
   function deleteSubject(subjectId, e) {
-  e.stopPropagation();
-  setConfirmModal({
-    message: 'Delete this subject and all its notes/quizzes/flashcards/cheatsheets? This cannot be undone.',
-    onConfirm: async () => {
-      await api.delete(`/subjects/${subjectId}`);
-      setConfirmModal(null);
-      loadSubjects();
-    },
-  });
+    e.stopPropagation();
+    setConfirmModal({
+      message: 'Delete this subject and all its notes/quizzes/flashcards/cheatsheets? This cannot be undone.',
+      onConfirm: async () => {
+        await api.delete(`/subjects/${subjectId}`);
+        setConfirmModal(null);
+        loadSubjects();
+      },
+    });
   }
 
   return (
     <div>
       <Navbar />
-      <div className="container" style={{ paddingTop: '2.5rem', paddingBottom: '3rem' }}>
+      <div className="container fade-in-up" style={{ paddingTop: '2.5rem', paddingBottom: '3rem', textAlign: 'center' }}>
         <h1 style={{ marginBottom: '0.25rem' }}>Welcome, {user?.name}!</h1>
         <h3 style={{ color: 'var(--color-text-muted)', fontWeight: 500, marginBottom: '2rem' }}>
           What are we studying today?
         </h3>
 
-        <div style={{ marginBottom: '2rem', maxWidth: '480px' }}>
+        <div style={{ margin: '0 auto 2rem', maxWidth: '480px' }}>
           <form onSubmit={createSubject} style={{ display: 'flex', gap: '0.75rem' }}>
             <input
               className="input"
               placeholder="Enter Subject title here"
               value={newSubjectTitle}
+              maxLength={30}
               onChange={(e) => setNewSubjectTitle(e.target.value)}
             />
             <button className="btn btn-primary" type="submit" style={{ whiteSpace: 'nowrap' }}>
@@ -87,13 +88,14 @@ export default function Dashboard() {
           disabled={subjects.length === 0}
           style={{ marginBottom: '1.5rem' }}
         >
-        Delete All Subjects
+          Delete All Subjects
         </button>
 
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fill, 220px)',
+            justifyContent: 'center',
             gap: '1rem',
           }}
         >
@@ -102,9 +104,9 @@ export default function Dashboard() {
               key={s._id}
               className="card"
               onClick={() => navigate(`/subjects/${s._id}/notes`)}
-              style={{ cursor: 'pointer', position: 'relative' }}
+              style={{ cursor: 'pointer', position: 'relative', textAlign: 'left' }}
             >
-              <h3 style={{ marginBottom: 0 }}>{s.title}</h3>
+              <h3 style={{ marginTop: '2.25rem', marginBottom: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }}>{s.title}</h3>
               <button
                 className="btn btn-danger"
                 onClick={(e) => deleteSubject(s._id, e)}
@@ -132,7 +134,7 @@ export default function Dashboard() {
           onConfirm={confirmModal.onConfirm}
           onCancel={() => setConfirmModal(null)}
         />
-        )}
+      )}
     </div>
   );
 }
