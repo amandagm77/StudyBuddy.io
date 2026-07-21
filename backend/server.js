@@ -11,6 +11,7 @@ const quizRoutes = require('./routes/quizRoutes');
 const rewriteRoutes = require('./routes/rewriteRoutes');
 const flashcardRoutes = require('./routes/flashcardRoutes');
 const cheatsheetRoutes = require('./routes/cheatsheetRoutes');
+const contactRoutes = require('./routes/contactRoutes');
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use('/api/quizzes', quizRoutes);
 app.use('/api/rewrites', rewriteRoutes);
 app.use('/api/flashcards', flashcardRoutes);
 app.use('/api/cheatsheets', cheatsheetRoutes);
+app.use('/api/contact', contactRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

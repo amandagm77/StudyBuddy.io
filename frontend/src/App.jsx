@@ -11,6 +11,7 @@ import Flashcards from './pages/Flashcards';
 import Cheatsheets from './pages/Cheatsheets';
 import CheatsheetEditor from './pages/CheatsheetEditor';
 import Settings from './pages/Settings';
+import Help from './pages/Help';
 
 export default function App() {
   return (
@@ -65,6 +66,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <CheatsheetEditor />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/help"
+              element={
+                <ProtectedRoute>
+                  <Help />
                 </ProtectedRoute>
               }
             />

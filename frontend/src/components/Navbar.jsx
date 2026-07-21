@@ -26,6 +26,9 @@ export default function Navbar() {
         <span style={{ color: 'var(--color-header-text)', fontWeight: 600, fontSize: '0.9rem' }}>
           {user?.name}
         </span>
+        <Link className="btn btn-secondary" to="/help" style={{ color: 'var(--color-header-text)', borderColor: 'var(--color-header-text)' }}>
+          Help
+        </Link>
         <Link className="btn btn-secondary" to="/settings" style={{ color: 'var(--color-header-text)', borderColor: 'var(--color-header-text)' }}>
           Settings
         </Link>
