@@ -98,7 +98,7 @@ export default function Settings() {
           <form onSubmit={handleNameSubmit}>
             <div className="form-group">
               <label className="label" htmlFor="settings-name">Name</label>
-              <input id="settings-name" className="input" value={name} onChange={(e) => setName(e.target.value)} />
+              <input id="settings-name" className="input" value={name} maxLength={30} onChange={(e) => setName(e.target.value)} />
             </div>
             {nameStatus.error && <p className="error-text">{nameStatus.error}</p>}
             {nameStatus.success && <p style={{ color: 'var(--color-primary)' }}>{nameStatus.success}</p>}

@@ -30,6 +30,9 @@ router.post('/register', async (req, res) => {
     if (!email || !password || !name) {
       return res.status(400).json({ error: 'Email, password, and name are required' });
     }
+    if (name.length > 30) {
+      return res.status(400).json({ error: 'Name must be 30 characters or fewer' });
+    }
     if (password.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
@@ -87,6 +90,9 @@ router.put('/name', requireAuth, async (req, res) => {
     const { name } = req.body;
     if (!name || !name.trim()) {
       return res.status(400).json({ error: 'Name cannot be blank' });
+    }
+    if (name.length > 30) {
+      return res.status(400).json({ error: 'Name must be 30 characters or fewer' });
     }
 
     const user = await User.findByIdAndUpdate(

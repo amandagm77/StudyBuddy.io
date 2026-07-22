@@ -44,6 +44,7 @@ export default function SubjectQuizzes() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {quizzes.map((q) => (
               <div
+                className="quiz-row"
                 key={q._id}
                 style={{
                   display: 'flex',

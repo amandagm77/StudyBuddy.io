@@ -6,6 +6,7 @@ export default function Navbar() {
 
   return (
     <header
+      className="app-navbar"
       style={{
         position: 'relative',
         background: 'radial-gradient(ellipse 700px 160% at center, var(--color-header-gradient-center) 0%, var(--color-header-gradient-edge) 100%)',
@@ -22,8 +23,8 @@ export default function Navbar() {
         <img src="/logos/logo-horizontal.png" alt="StudyBuddy.io" style={{ height: '44px' }} />
       </Link>
 
-      <div style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <span style={{ color: 'var(--color-header-text)', fontWeight: 600, fontSize: '0.9rem' }}>
+      <div className="app-navbar-actions" style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <span style={{ color: 'var(--color-header-text)', fontWeight: 600, fontSize: '0.9rem', overflowWrap: 'break-word', wordBreak: 'break-word', maxWidth: '150px' }}>
           {user?.name}
         </span>
         <Link className="btn btn-secondary" to="/help" style={{ color: 'var(--color-header-text)', borderColor: 'var(--color-header-text)' }}>

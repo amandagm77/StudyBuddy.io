@@ -9,6 +9,14 @@ import NoteEditor from '../components/NoteEditor';
 import ConfirmModal from '../components/ConfirmModal';
 import { Sparkles } from 'lucide-react';
 
+// Quill sometimes saves a non-breaking space (&nbsp;) instead of a normal space,
+// which silently blocks the browser from wrapping a line at that exact point —
+// causing words to look like they're splitting mid-letter instead of wrapping
+// as whole words. Replacing it with a normal space fixes that at render time.
+function normalizeSpaces(html) {
+  return html.replace(/&nbsp;/g, ' ').replace(/\u00A0/g, ' ');
+}
+
 export default function SubjectNotes() {
   const { subjectId } = useParams();
   const [subject, setSubject] = useState(null);
@@ -207,8 +215,9 @@ export default function SubjectNotes() {
                       {n.title}
                     </strong>
                     <div
-                      style={{ overflowWrap: 'break-word', color: 'var(--color-text-muted)' }}
-                      dangerouslySetInnerHTML={{ __html: n.body }}
+                      className="note-content"
+                      style={{ color: 'var(--color-text-muted)' }}
+                      dangerouslySetInnerHTML={{ __html: normalizeSpaces(n.body) }}
                     />
                   </div>
                 </div>

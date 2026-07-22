@@ -15,7 +15,7 @@ export default function SubjectNav({ subjectId, subjectTitle }) {
       <Link to="/dashboard" className="muted" style={{ fontSize: '1.05rem' }}>&larr; All Subjects</Link>
       <h2 style={{ margin: '0.5rem 0 1rem' }}>{subjectTitle}</h2>
 
-      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '2px solid var(--color-border)' }}>
+      <div className="subject-tabs" style={{ display: 'flex', gap: '0.5rem', borderBottom: '2px solid var(--color-border)' }}>
         {tabs.map((tab) => {
           const path = `/subjects/${subjectId}/${tab.path}`;
           const isActive = location.pathname === path;

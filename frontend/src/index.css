@@ -68,6 +68,8 @@ html, body {
   margin: 0;
   padding: 0;
   scrollbar-gutter: stable;
+  overflow-y: scroll;
+  overflow-x: hidden; /* safety net: no element can ever force horizontal page scroll */
 }
 
 body {
@@ -83,6 +85,13 @@ h1, h2, h3, h4 {
   font-weight: 600;
   color: var(--color-text);
   margin: 0 0 0.5rem;
+}
+
+.note-content,
+.note-content * {
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+  white-space: normal !important;
 }
 
 a {
@@ -240,4 +249,53 @@ a:hover {
 
 .fade-in-up {
   animation: fadeInUp 2s ease forwards;
+}
+
+/* ---- Mobile responsiveness for the top banner and subject tab bar ---- */
+@media (max-width: 640px) {
+  .app-navbar {
+    grid-template-columns: 1fr !important; /* drop the 3-column layout entirely */
+    justify-items: center;
+    row-gap: 0.75rem;
+    padding: 0.75rem 1rem !important;
+  }
+
+  .app-navbar-actions {
+    justify-self: center !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem !important;
+  }
+
+  .app-navbar-actions .btn {
+    padding: 0.45rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+.subject-tabs {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  border-bottom: none !important; /* the shared bottom border doesn't make sense once tabs aren't in one row */
+}
+
+.subject-tabs a {
+  text-align: center;
+  padding: 0.6rem 0.5rem !important;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0 !important; /* cancels the desktop version's -2px underline offset trick */
+}
+
+.quiz-row {
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.quiz-row > div {
+  justify-content: center !important;
+}
+
 }

@@ -65,7 +65,7 @@ export default function Dashboard() {
     <div>
       <Navbar />
       <div className="container fade-in-up" style={{ paddingTop: '2.5rem', paddingBottom: '3rem', textAlign: 'center' }}>
-        <h1 style={{ marginBottom: '0.25rem' }}>Welcome, {user?.name}!</h1>
+        <h1 style={{ marginBottom: '0.25rem', overflowWrap: 'break-word', wordBreak: 'break-word' }}>Welcome, {user?.name}!</h1>
         <h3 style={{ color: 'var(--color-text-muted)', fontWeight: 500, marginBottom: '2rem' }}>
           What are we studying today?
         </h3>

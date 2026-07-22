@@ -13,82 +13,88 @@ import Cheatsheets from './pages/Cheatsheets';
 import CheatsheetEditor from './pages/CheatsheetEditor';
 import Settings from './pages/Settings';
 import Help from './pages/Help';
+import Footer from './components/Footer';
 
 export default function App() {
   return (
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/subjects/:subjectId/notes"
-              element={
-                <ProtectedRoute>
-                  <SubjectNotes />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/subjects/:subjectId/quizzes"
-              element={
-                <ProtectedRoute>
-                  <SubjectQuizzes />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/subjects/:subjectId/flashcards"
-              element={
-                <ProtectedRoute>
-                  <Flashcards />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/subjects/:subjectId/cheatsheets"
-              element={
-                <ProtectedRoute>
-                  <Cheatsheets />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/cheatsheets/:cheatsheetId/edit"
-              element={
-                <ProtectedRoute>
-                  <CheatsheetEditor />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/help"
-              element={
-                <ProtectedRoute>
-                  <Help />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            <div style={{ flex: 1 }}>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/subjects/:subjectId/notes"
+                  element={
+                    <ProtectedRoute>
+                      <SubjectNotes />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/subjects/:subjectId/quizzes"
+                  element={
+                    <ProtectedRoute>
+                      <SubjectQuizzes />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/subjects/:subjectId/flashcards"
+                  element={
+                    <ProtectedRoute>
+                      <Flashcards />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/subjects/:subjectId/cheatsheets"
+                  element={
+                    <ProtectedRoute>
+                      <Cheatsheets />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/cheatsheets/:cheatsheetId/edit"
+                  element={
+                    <ProtectedRoute>
+                      <CheatsheetEditor />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/help"
+                  element={
+                    <ProtectedRoute>
+                      <Help />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <Settings />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              </Routes>
+            </div>
+            <Footer />
+          </div>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

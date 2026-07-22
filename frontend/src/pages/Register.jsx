@@ -37,6 +37,7 @@ export default function Register() {
             id="register-name"
             className="input"
             value={form.name}
+            maxLength={30}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             required
           />
