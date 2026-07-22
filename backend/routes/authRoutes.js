@@ -14,7 +14,7 @@ const router = express.Router();
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production', // HTTPS only in prod
-  sameSite: 'lax', // CSRF protection: cookie won't be sent on cross-site POSTs
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 };
 
