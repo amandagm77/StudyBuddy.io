@@ -20,7 +20,7 @@ This project was built as a capstone for a Software Engineering bootcamp, with a
 **Authentication & Accounts**
 - Registration, login, and logout using JWT stored in httpOnly cookies (not localStorage)
 - Protected routes and API endpoints — every resource is scoped to its owner
-- Forgot Password flow with a 6-digit code emailed via Nodemailer + Gmail
+- Forgot Password flow with a 6-digit code emailed via Resend
 - Settings page: update name, email (password-confirmed), and password (with repeat-password confirmation), plus a Dark Mode toggle
 
 **Study Tools**
@@ -111,7 +111,7 @@ Both features share the same API key, Anthropic SDK client, and error-handling p
 - Node.js + Express
 - MongoDB + Mongoose (hosted on MongoDB Atlas)
 - JWT (`jsonwebtoken`) + `bcryptjs` for auth
-- Nodemailer (Gmail) for password reset emails
+- Resend (HTTP-based email API) for password reset emails
 - Anthropic SDK (`@anthropic-ai/sdk`) for Claude API integration
 
 ### Testing
@@ -142,7 +142,7 @@ npm install
 ### 4. Set up required accounts/keys
 - **MongoDB Atlas** — create a free cluster and database user at https://www.mongodb.com/cloud/atlas
 - **Anthropic API key** — create one at https://console.anthropic.com, and add billing credits (Settings → Plans & Billing)
-- **Gmail App Password** — enable 2-Step Verification on a Gmail account, then generate an App Password at https://myaccount.google.com/apppasswords (used to send password reset emails)
+- **Resend API key** — create a free account at https://resend.com and generate an API key (used to send password reset emails). Free tier: 3,000 emails/month, no credit card required.
 
 ### 5. Configure environment variables
 Copy `backend/.env.example` to `backend/.env` and fill in your own values (see the **Environment Variables** section below).
@@ -181,8 +181,7 @@ These live in `backend/.env` (never committed — see `.env.example` for the tem
 | `NODE_ENV` | `development` or `production` (affects cookie security settings) |
 | `CLIENT_URL` | The frontend's origin, for CORS (e.g. `http://localhost:5173`) |
 | `ANTHROPIC_API_KEY` | Your Anthropic Console API key, for Claude API calls |
-| `GMAIL_USER` | The Gmail address used to send password reset emails |
-| `GMAIL_APP_PASSWORD` | The 16-character Gmail App Password (no spaces) |
+| `RESEND_API_KEY` | API key from your Resend account, for sending password reset emails |
 
 ---
 
@@ -198,8 +197,8 @@ A complete capstone documentation package — covering architecture, MongoDB sch
 
 🚧 *Deployment is in progress. Live links will be added here once the frontend and backend are deployed.*
 
-- Frontend: _TBD_
-- Backend API: _TBD_
+- Frontend: [https://studybuddy-io.onrender.com]
+- Backend API: [https://studybuddy-io-backend.onrender.com]
 
 ---
 

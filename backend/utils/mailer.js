@@ -1,13 +1,3 @@
-const nodemailer = require('nodemailer');
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
-
 async function sendResetCodeEmail(toEmail, code) {
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',

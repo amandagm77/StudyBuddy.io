@@ -12,7 +12,13 @@ export default function SubjectNav({ subjectId, subjectTitle }) {
 
   return (
     <div style={{ marginBottom: '1.5rem' }}>
-      <Link to="/dashboard" className="muted" style={{ fontSize: '1.05rem' }}>&larr; All Subjects</Link>
+      <Link
+        to="/dashboard"
+        className="btn btn-secondary"
+        style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.75rem' }}
+      >
+        <span aria-hidden="true">&larr;</span> All Subjects
+      </Link>
       <h2 style={{ margin: '0.5rem 0 1rem' }}>{subjectTitle}</h2>
 
       <div className="subject-tabs" style={{ display: 'flex', gap: '0.5rem', borderBottom: '2px solid var(--color-border)' }}>

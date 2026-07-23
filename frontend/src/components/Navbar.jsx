@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const { theme } = useTheme();
+  const logoSrc = theme === 'dark' ? '/logos/logo-horizontal-darkmode.png' : '/logos/logo-horizontal.png';
 
   return (
     <header
@@ -20,13 +23,10 @@ export default function Navbar() {
       <div />
 
       <Link to="/dashboard" style={{ justifySelf: 'center' }}>
-        <img src="/logos/logo-horizontal.png" alt="StudyBuddy.io" style={{ height: '44px' }} />
+        <img src={logoSrc} alt="StudyBuddy.io" style={{ height: '44px' }} />
       </Link>
 
       <div className="app-navbar-actions" style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <span style={{ color: 'var(--color-header-text)', fontWeight: 600, fontSize: '0.9rem', overflowWrap: 'break-word', wordBreak: 'break-word', maxWidth: '150px' }}>
-          {user?.name}
-        </span>
         <Link className="btn btn-secondary" to="/help" style={{ color: 'var(--color-header-text)', borderColor: 'var(--color-header-text)' }}>
           Help
         </Link>

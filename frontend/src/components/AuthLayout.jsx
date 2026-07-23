@@ -1,4 +1,8 @@
+import { useTheme } from '../context/ThemeContext';
+
 export default function AuthLayout({ children }) {
+  const { theme } = useTheme();
+  const logoSrc = theme === 'dark' ? '/logos/logo-stacked-darkmode.png' : '/logos/logo-stacked.png';
   return (
     <div
       style={{
@@ -29,7 +33,7 @@ export default function AuthLayout({ children }) {
 
       <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '400px', padding: '1.5rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img src="/logos/logo-stacked.png" alt="StudyBuddy.io" className="fade-in" style={{ width: '220px' }} />
+          <img src={logoSrc} alt="StudyBuddy.io" className="fade-in" style={{ width: '220px' }} />
             <p className="muted" style={{ marginTop: '0.75rem', fontSize: '1rem' }}>
               An app for students to organize notes and study smarter for any test.
             </p>

@@ -55,7 +55,7 @@
   --color-border: #334155;
   --color-text: #f1f5f9;
   --color-text-muted: #94a3b8;
-  --color-header-gradient-center: #0f172a; /* dark navy center — logo's own white padding keeps it legible */
+  --color-header-gradient-center: #0f172a; /* dark navy center */
   --color-header-gradient-edge: var(--brand-green-dark); /* keeps the mint identity, just deeper for contrast */
   --color-header-text: #f1f5f9; /* light text so name/buttons stay visible against the dark center */
 }
