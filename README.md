@@ -195,8 +195,6 @@ A complete capstone documentation package — covering architecture, MongoDB sch
 
 ## 🌐 Deployment
 
-🚧 *Deployment is in progress. Live links will be added here once the frontend and backend are deployed.*
-
 - Frontend: [https://studybuddy-io.onrender.com]
 - Backend API: [https://studybuddy-io-backend.onrender.com]
 
