@@ -123,7 +123,7 @@ export default function Dashboard() {
               aria-label={`Open ${s.title}`}
               style={{ cursor: 'pointer', position: 'relative', textAlign: 'left' }}
             >
-              <h3 style={{ marginTop: '2.25rem', marginBottom: 0, overflowWrap: 'break-word', wordBreak: 'break-word' }}>{s.title}</h3>
+              <h3 style={{ marginTop: '2.25rem', marginBottom: '0.75rem', overflowWrap: 'break-word', wordBreak: 'break-word', textAlign: 'center', fontSize: '1.5rem' }}>{s.title}</h3>
               <button
                 className="btn btn-danger"
                 onClick={(e) => deleteSubject(s._id, e)}
