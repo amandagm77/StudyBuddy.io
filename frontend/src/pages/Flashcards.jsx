@@ -18,6 +18,11 @@ export default function Flashcards() {
   const [studyMode, setStudyMode] = useState(false);
   const [confirmModal, setConfirmModal] = useState(null);
 
+  // Inline edit state — only one card can be in edit mode at a time
+  const [editingCardId, setEditingCardId] = useState(null);
+  const [editForm, setEditForm] = useState({ front: '', back: '' });
+  const [editError, setEditError] = useState('');
+
   useEffect(() => {
     api.get(`/subjects/${subjectId}`).then((res) => setSubject(res.data));
     loadCards();
@@ -46,6 +51,35 @@ export default function Flashcards() {
       loadCards();
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create flashcard');
+    }
+  }
+
+  function startEdit(card) {
+    setEditingCardId(card._id);
+    setEditForm({ front: card.front, back: card.back });
+    setEditError('');
+  }
+
+  function cancelEdit() {
+    setEditingCardId(null);
+    setEditError('');
+  }
+
+  async function saveEdit(cardId) {
+    if (!editForm.front.trim()) {
+      setEditError("Front side can't be blank.");
+      return;
+    }
+    if (!editForm.back.trim()) {
+      setEditError("Back side can't be blank.");
+      return;
+    }
+    try {
+      await api.put(`/flashcards/${cardId}`, { front: editForm.front, back: editForm.back });
+      setEditingCardId(null);
+      loadCards();
+    } catch (err) {
+      setEditError(err.response?.data?.error || 'Failed to update flashcard');
     }
   }
 
@@ -141,29 +175,73 @@ export default function Flashcards() {
                   gap: '1rem',
                 }}
               >
-                {cards.map((c) => (
-                  <div key={c._id} className="card" style={{ padding: '1.25rem' }}>
-                    <div style={{ fontWeight: 'bold', fontSize: '1.15rem', marginBottom: '0.5rem' }}>
-                      {c.front}
+                {cards.map((c) => {
+                  const isEditing = editingCardId === c._id;
+                  return (
+                    <div key={c._id} className="card" style={{ padding: '1.25rem' }}>
+                      {isEditing ? (
+                        <>
+                          <div className="form-group">
+                            <label className="label">Front</label>
+                            <input
+                              className="input"
+                              value={editForm.front}
+                              maxLength={MAX_CHARS}
+                              onChange={(e) => setEditForm({ ...editForm, front: e.target.value })}
+                            />
+                            <span className="muted" aria-live="polite">{editForm.front.length}/{MAX_CHARS}</span>
+                          </div>
+                          <div className="form-group">
+                            <label className="label">Back</label>
+                            <input
+                              className="input"
+                              value={editForm.back}
+                              maxLength={MAX_CHARS}
+                              onChange={(e) => setEditForm({ ...editForm, back: e.target.value })}
+                            />
+                            <span className="muted" aria-live="polite">{editForm.back.length}/{MAX_CHARS}</span>
+                          </div>
+                          {editError && <p className="error-text">{editError}</p>}
+                          <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <button className="btn btn-primary" onClick={() => saveEdit(c._id)}>Save</button>
+                            <button className="btn btn-secondary" onClick={cancelEdit}>Cancel</button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div style={{ fontWeight: 'bold', fontSize: '1.15rem', marginBottom: '0.5rem' }}>
+                            {c.front}
+                          </div>
+                          <div style={{
+                            fontWeight: 'bold',
+                            fontSize: '1.05rem',
+                            color: 'var(--color-primary)',
+                            paddingTop: '0.5rem',
+                            borderTop: '1px dashed var(--color-border)',
+                          }}>
+                            {c.back}
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+                            <button
+                              className="btn btn-secondary"
+                              onClick={() => startEdit(c)}
+                              style={{ fontSize: '0.8rem', padding: '0.3rem 0.7rem' }}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="btn btn-danger"
+                              onClick={() => deleteCard(c._id)}
+                              style={{ fontSize: '0.8rem', padding: '0.3rem 0.7rem' }}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
-                    <div style={{
-                      fontWeight: 'bold',
-                      fontSize: '1.05rem',
-                      color: 'var(--color-primary)',
-                      paddingTop: '0.5rem',
-                      borderTop: '1px dashed var(--color-border)',
-                    }}>
-                      {c.back}
-                    </div>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => deleteCard(c._id)}
-                      style={{ marginTop: '0.75rem', fontSize: '0.8rem', padding: '0.3rem 0.7rem' }}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </>
           )}

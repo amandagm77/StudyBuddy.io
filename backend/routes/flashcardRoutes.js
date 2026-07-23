@@ -38,6 +38,29 @@ router.post('/', async (req, res) => {
   res.status(201).json(flashcard);
 });
 
+// PUT /api/flashcards/:id
+router.put('/:id', async (req, res) => {
+  const { front, back } = req.body;
+  if (front !== undefined && front.length > MAX_CHARS) {
+    return res.status(400).json({ error: `Front must be ${MAX_CHARS} characters or fewer` });
+  }
+  if (back !== undefined && back.length > MAX_CHARS) {
+    return res.status(400).json({ error: `Back must be ${MAX_CHARS} characters or fewer` });
+  }
+
+  const update = {};
+  if (front !== undefined) update.front = front;
+  if (back !== undefined) update.back = back;
+
+  const flashcard = await Flashcard.findOneAndUpdate(
+    { _id: req.params.id, owner: req.userId },
+    update,
+    { new: true }
+  );
+  if (!flashcard) return res.status(404).json({ error: 'Flashcard not found' });
+  res.json(flashcard);
+});
+
 // DELETE /api/flashcards?subject=<subjectId> — bulk delete all flashcards in a subject
 router.delete('/', async (req, res) => {
   const { subject } = req.query;
